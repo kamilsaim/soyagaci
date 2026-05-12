@@ -540,8 +540,14 @@ function save(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{
     const d=JSON.parse(snap);
+    const pCount=Object.keys(d.people||{}).length;
+    const linkCount=Object.values(d.people||{}).filter(p=>p.father||p.mother||(p.children&&p.children.length)).length;
+    console.log(`Supabase'e kaydediliyor: ${pCount} kişi, ${linkCount} bağlantılı`);
     supa.from('family_data').upsert({user_id:supaUser.id,people:d.people,fams:d.fams,next_id:d.nextId},{onConflict:'user_id'})
-      .catch(e=>console.error('Kaydetme hatası:',e));
+      .then(({error})=>{
+        if(error)console.error('Kaydetme hatası:',error);
+        else console.log(`✅ Supabase'e kaydedildi: ${pCount} kişi`);
+      });
   },800);
 }
 
@@ -560,11 +566,26 @@ async function load(){
   if(supaUser){
     try{
       const {data}=await supa.from('family_data').select('people,fams,next_id').eq('user_id',supaUser.id).single();
-      if(data){people=data.people||{};fams=data.fams||{};nextId=data.next_id||1;migrateData();return;}
-    }catch(e){}
+      if(data){
+        const supaCount=Object.keys(data.people||{}).length;
+        // Supabase verisinde bağlantı kontrolü: kişi var ama hiç ebeveyn/çocuk yoksa bozuk veri olabilir
+        const hasLinks=supaCount>0&&Object.values(data.people).some(p=>p.father||p.mother||(p.children&&p.children.length));
+        if(supaCount>0&&(hasLinks||supaCount<=3)){
+          people=data.people||{};fams=data.fams||{};nextId=data.next_id||1;migrateData();return;
+        }
+        // Supabase verisi bağlantısız görünüyor, localStorage'ı dene
+        console.warn('Supabase verisi bağlantısız görünüyor, localStorage kontrol ediliyor...');
+      }
+    }catch(e){console.warn('Supabase load hatası:',e);}
   }
+  // localStorage'dan yükle
   try{const d=localStorage.getItem('sa4');if(d){const o=JSON.parse(d);people=o.people||{};fams=o.fams||{};nextId=o.nextId||1;}}catch(e){}
   migrateData();
+  // Oturum açık ama veriler localStorage'dan geldiyse → Supabase'e pushla
+  if(supaUser&&Object.keys(people).length>0){
+    console.log('localStorage verisi Supabase ile senkronize ediliyor...');
+    save();
+  }
 }
 
 // ── AUTO-CAP ──
