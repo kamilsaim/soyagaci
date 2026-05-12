@@ -499,12 +499,14 @@ let missFilt='all';
 function newId(){return 'P'+(nextId++);}
 
 function save(){
-  try{localStorage.setItem('sa4',JSON.stringify({people,fams,nextId}));}catch(e){}
+  const snap=JSON.stringify({people,fams,nextId});
+  try{localStorage.setItem('sa4',snap);}catch(e){}
   if(!supaUser)return;
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(async()=>{
-    try{await supa.from('family_data').upsert({user_id:supaUser.id,people,fams,next_id:nextId},{onConflict:'user_id'});}
-    catch(e){console.error('Kaydetme hatası:',e);}
+  saveTimer=setTimeout(()=>{
+    const d=JSON.parse(snap);
+    supa.from('family_data').upsert({user_id:supaUser.id,people:d.people,fams:d.fams,next_id:d.nextId},{onConflict:'user_id'})
+      .catch(e=>console.error('Kaydetme hatası:',e));
   },800);
 }
 
