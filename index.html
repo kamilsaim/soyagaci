@@ -213,6 +213,7 @@ textarea{resize:vertical;min-height:65px}
       <svg viewBox="0 0 48 48"><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2v6h7.8c4.5-4.2 7.1-10.4 7.1-17.2z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.8l-7.8-6c-2.1 1.4-4.8 2.3-7.9 2.3-6.1 0-11.2-4.1-13-9.6H3v6.2C6.9 42.7 14.9 48 24 48z"/><path fill="#FBBC05" d="M11 28.9c-.5-1.4-.7-2.8-.7-4.4s.2-3 .7-4.4v-6.2H3C1.1 17.5 0 20.6 0 24s1.1 6.5 3 8.9l8-6.2v2.2z"/><path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.5l6.6-6.6C35.8 2.5 30.4 0 24 0 14.9 0 6.9 5.3 3 13.1l8 6.2C12.8 13.6 17.9 9.5 24 9.5z"/></svg>
       Google ile Giriş Yap
     </button>
+    <button onclick="useLocally()" style="margin-top:10px;background:none;border:none;color:var(--text3);font-size:.8rem;cursor:pointer;text-decoration:underline;font-family:'Nunito',sans-serif">Yerel olarak kullan (sadece bu cihaz)</button>
   </div>
 </div>
 <header>
@@ -1293,16 +1294,41 @@ function renderStats(){
 function handleGED(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>parseGED(e.target.result);r.readAsText(f,'UTF-8');inp.value='';}
 function expJSON(){dl('soy-agaci.json',JSON.stringify({people,fams,nextId},null,2),'application/json');}
 function expGED(){
-  let g='0 HEAD\n1 CHAR UTF-8\n1 SOUR SoyAgaci\n';
-  Object.values(people).forEach(p=>{
-    g+=`0 @${p.id}@ INDI\n1 NAME ${p.firstName} /${p.lastName||''}/\n`;
-    if(p.gender)g+=`1 SEX ${p.gender}\n`;
-    if(p.birthDate||p.birthPlace){g+='1 BIRT\n';if(p.birthDate)g+=`2 DATE ${p.birthDate}\n`;if(p.birthPlace)g+=`2 PLAC ${p.birthPlace}\n`;}
-    if(p.deathDate||p.deathPlace){g+='1 DEAT\n';if(p.deathDate)g+=`2 DATE ${p.deathDate}\n`;if(p.deathPlace)g+=`2 PLAC ${p.deathPlace}\n`;}
-    if(p.occupation)g+=`1 OCCU ${p.occupation}\n`;
-    if(p.notes)g+=`1 NOTE ${p.notes}\n`;
+  const arr=Object.values(people);
+  let out='0 HEAD\n1 CHAR UTF-8\n1 SOUR SoyAgaci\n';
+  // INDI kayıtları
+  arr.forEach(p=>{
+    out+=`0 @${p.id}@ INDI\n1 NAME ${p.firstName||''} /${p.lastName||''}/\n`;
+    if(p.gender)out+=`1 SEX ${p.gender}\n`;
+    if(p.birthDate||p.birthPlace){out+='1 BIRT\n';if(p.birthDate)out+=`2 DATE ${p.birthDate}\n`;if(p.birthPlace)out+=`2 PLAC ${p.birthPlace}\n`;}
+    if(p.deathDate||p.deathPlace){out+='1 DEAT\n';if(p.deathDate)out+=`2 DATE ${p.deathDate}\n`;if(p.deathPlace)out+=`2 PLAC ${p.deathPlace}\n`;}
+    if(p.occupation)out+=`1 OCCU ${p.occupation}\n`;
+    if(p.notes)out+=`1 NOTE ${p.notes}\n`;
   });
-  g+='0 TRLR\n';dl('soy-agaci.ged',g,'text/plain');
+  // FAM kayıtları — çiftler için
+  const done=new Set();const childInFam=new Set();let fi=1;
+  arr.forEach(p=>{
+    (p.spouses||[]).forEach(s=>{
+      const key=[p.id,s.id].sort().join(':');
+      if(done.has(key))return;done.add(key);
+      const sp=people[s.id];if(!sp)return;
+      const husb=p.gender==='F'?sp:p,wife=p.gender==='F'?p:sp;
+      const kids=arr.filter(c=>c.father===husb.id&&c.mother===wife.id).map(c=>c.id);
+      kids.forEach(cid=>childInFam.add(cid));
+      out+=`0 @F${fi++}@ FAM\n1 HUSB @${husb.id}@\n1 WIFE @${wife.id}@\n`;
+      if(s.status==='divorced')out+='1 DIV Y\n';
+      kids.forEach(cid=>out+=`1 CHIL @${cid}@\n`);
+    });
+  });
+  // Tek ebeveynli çocuklar
+  arr.forEach(p=>{
+    const unc=(p.children||[]).filter(cid=>people[cid]&&!childInFam.has(cid));
+    if(!unc.length)return;
+    out+=`0 @F${fi++}@ FAM\n`;
+    out+=(p.gender==='F')?`1 WIFE @${p.id}@\n`:`1 HUSB @${p.id}@\n`;
+    unc.forEach(cid=>{childInFam.add(cid);out+=`1 CHIL @${cid}@\n`;});
+  });
+  out+='0 TRLR\n';dl('soy-agaci.ged',out,'text/plain');
 }
 function dl(fn,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=fn;a.click();}
 function clearAll(){if(!confirm('Tüm veriler silinecek. Emin misiniz?'))return;people={};fams={};nextId=1;imgCache={};nodeDrag={};save();renderAll();buildTree();toast('🗑️ Tüm veriler silindi');}
@@ -1377,6 +1403,13 @@ async function signOut(){
   await supa.auth.signOut();
   people={};fams={};nextId=1;nodeDrag={};
   renderAll();buildTree();
+}
+async function useLocally(){
+  document.getElementById('authOverlay').style.display='none';
+  await load();
+  await loadLayout();
+  resizeCanvas();renderAll();buildTree();
+  setTimeout(()=>{if(Object.keys(nodePos).length)fitAll();},200);
 }
 
 async function initApp(){
