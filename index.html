@@ -704,7 +704,7 @@ function renderList(){
     const em=p.gender==='M'?'👨':'👩';
     const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';
     const maiden=p.maidenName&&p.gender==='F'?` <span style="font-size:.73rem;color:var(--text3);font-weight:400">(d.${p.maidenName})</span>`:'';
-    const dt=[p.birthDate,p.deathDate?'† '+p.deathDate:''].filter(Boolean).join(' — ');
+    const dt=[p.birthDate,p.deathDate?p.deathDate:''].filter(Boolean).join(' — ');
     const gc=(p.gallery||[]).length;
     const chk=selIds.has(p.id);
     const isDivorced=(p.spouses||[]).some(s=>s.status==='divorced');
@@ -1201,7 +1201,7 @@ function drawNode(p,x,y){
   const by=(p.birthDate||'').match(/\d{4}/)?.[0],dy=(p.deathDate||'').match(/\d{4}/)?.[0];
   const dateY=avY+avR+(p.maidenName&&p.gender==='F'?26:16);
   ctx.font='8.5px Nunito,sans-serif';ctx.fillStyle='#b0967e';if(by)ctx.fillText('*'+by,x+NW/2,dateY);
-  if(dy){ctx.fillStyle='#aaa';ctx.fillText('†'+dy,x+NW/2,dateY+(by?10:0));}
+  if(dy){ctx.fillStyle='#aaa';ctx.fillText(dy,x+NW/2,dateY+(by?10:0));}
   const chCount=(p.children||[]).filter(c=>people[c]).length;
   if(chCount>0){ctx.beginPath();ctx.arc(x+NW-7,y+NH-7,7,0,Math.PI*2);ctx.fillStyle='#8faa8a';ctx.fill();ctx.font='bold 8px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(chCount,x+NW-7,y+NH-7);}
 }
@@ -1329,8 +1329,8 @@ function renderStats(){
       ${avgAge!==null?`<div class="sc wide"><div class="sn">${avgAge}</div><div class="sl">Ortalama Yaşam (yıl)</div></div>`:''}
     </div>
     ${oldest||youngest?`<div class="cbw"><div class="cbt">🏅 Yaşam Rekorları</div>
-      ${oldest?`<div class="life-card" onclick="openDetail('${oldest.id}')"><div class="life-name">🥇 En Uzun: ${oldest.name}</div><div class="life-detail">*${oldest.by} — †${oldest.dy} · ${oldest.age} yıl</div></div>`:''}
-      ${youngest&&youngest.id!==oldest?.id?`<div class="life-card" onclick="openDetail('${youngest.id}')"><div class="life-name">📉 En Kısa: ${youngest.name}</div><div class="life-detail">*${youngest.by} — †${youngest.dy} · ${youngest.age} yıl</div></div>`:''}
+      ${oldest?`<div class="life-card" onclick="openDetail('${oldest.id}')"><div class="life-name">🥇 En Uzun: ${oldest.name}</div><div class="life-detail">*${oldest.by} — ${oldest.dy} · ${oldest.age} yıl</div></div>`:''}
+      ${youngest&&youngest.id!==oldest?.id?`<div class="life-card" onclick="openDetail('${youngest.id}')"><div class="life-name">📉 En Kısa: ${youngest.name}</div><div class="life-detail">*${youngest.by} — ${youngest.dy} · ${youngest.age} yıl</div></div>`:''}
     </div>`:''}
     ${topNames.length?`<div class="cbw"><div class="cbt">👤 En Çok Kullanılan İsimler</div>${topNames.map(([n,c],i)=>`<div class="cbi"><div class="cbl">${n}</div><div class="cbtr"><div class="cbf" style="width:${Math.round(c/maxN*100)}%;background:${BC[i%BC.length]}"></div></div><div class="cbc">${c}</div></div>`).join('')}</div>`:''}
     ${sd.length?`<div class="cbw"><div class="cbt">📅 On Yıllara Göre Doğumlar</div>${sd.map(([d,c],i)=>`<div class="cbi"><div class="cbl">${d}'ler</div><div class="cbtr"><div class="cbf" style="width:${Math.round(c/maxD*100)}%;background:${BC[i%BC.length]}"></div></div><div class="cbc">${c}</div></div>`).join('')}</div>`:''}
