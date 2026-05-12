@@ -1,6 +1,6 @@
-# 🌳 Soy Ağacı
+# Soy Ağacı
 
-**Soy Ağacı**, tamamen tarayıcıda çalışan, sunucu gerektirmeyen Türkçe aile ağacı uygulamasıdır.
+**Soy Ağacı v4.0**, tamamen tarayıcıda çalışan Türkçe aile ağacı uygulamasıdır. Google hesabıyla giriş yaparak verilerini bulutta sakla ya da çevrimdışı yerel olarak kullan.
 
 ---
 
@@ -47,7 +47,7 @@
 
 ### İçe / Dışa Aktarma
 - **GEDCOM (.ged)** içe aktarma — MyHeritage, Ancestry uyumlu
-- **GEDCOM (.ged)** dışa aktarma
+- **GEDCOM (.ged)** dışa aktarma (INDI + FAM kayıtları)
 - **JSON** yedek dosyası dışa aktarma
 - Sürükle-bırak ile dosya içe aktarma
 - Yerleşik demo veri seti
@@ -60,9 +60,9 @@
 |--------|-----------|
 | Arayüz | Vanilla HTML5 / CSS3 / JavaScript |
 | Görselleştirme | Canvas API |
-| Veri Saklama | `localStorage` → Supabase'e geçiş planlanıyor |
-| Kimlik Doğrulama | Yok → Google OAuth planlanıyor |
-| Bağımlılık | **Yok** — tek dosya, çevrimdışı çalışır |
+| Veri Saklama | `localStorage` + Supabase (bulut) |
+| Kimlik Doğrulama | Supabase Auth — Google OAuth |
+| Bağımlılık | Supabase JS v2 CDN (opsiyonel) |
 
 ---
 
@@ -73,6 +73,8 @@ Herhangi bir kurulum gerekmez:
 ```
 soy-agaci.html dosyasını tarayıcıda aç → kullanmaya başla
 ```
+
+Google ile giriş yaparak Supabase bulut yedeklemesini etkinleştirebilir ya da "Yerel olarak kullan" butonuyla çevrimdışı devam edebilirsin.
 
 ---
 
@@ -87,25 +89,19 @@ temiz son/
 
 ---
 
-## Veri Yapısı (localStorage)
+## Veri Yapısı
 
+**localStorage (çevrimdışı mod):**
 ```
 sa4   → { people: {...}, fams: {...}, nextId: number }
 sa4nd → { [kişiId]: { x, y } }  // ağaç düğüm pozisyonları
 ```
 
----
-
-## Planlanan Geliştirmeler
-
-- [ ] **Supabase entegrasyonu** — çoklu cihaz senkronizasyonu, bulut yedekleme
-  - `save()` → Supabase `upsert`
-  - `load()` → Supabase `select`
-  - `people` ve `nodeDrag` tabloları
-- [ ] **Google ile giriş (OAuth)** — kişisel veri güvenliği
-  - Supabase Auth + Google OAuth Provider
-  - Kullanıcı bazlı veri izolasyonu
-- [ ] **Kullanıcıya özel ağaç** — her kullanıcı kendi ağacını görür ve yönetir
+**Supabase (bulut mod):**
+```
+family_data   → { user_id, people, fams, next_id }
+node_positions → { user_id, positions }
+```
 
 ---
 
@@ -113,7 +109,8 @@ sa4nd → { [kişiId]: { x, y } }  // ağaç düğüm pozisyonları
 
 | Sürüm | Değişiklikler |
 |-------|--------------|
-| v3.0 | Fotoğraf galerisi, gelişmiş ilişki yönetimi, istatistik paneli |
+| v4.0 | Google ile giriş (Supabase Auth), bulut yedekleme, aile arması logosu, PWA favicon, mobil alt menü, animasyonlu simgeler |
+| v3.0 | Fotoğraf galerisi, gelişmiş ilişki yönetimi, istatistik paneli, eksik veri raporu |
 | v2.0 | Canvas ağaç görselleştirme, GEDCOM içe/dışa aktarma |
 | v1.0 | Temel kişi yönetimi, liste görünümü |
 
