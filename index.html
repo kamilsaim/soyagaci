@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Soy Ağacı</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#f5f0eb;--surface:#fffdf9;--surface2:#fdf6ee;--border:#e8ddd0;
+  --text:#3d2f23;--text2:#7a6457;--text3:#b0967e;
+  --accent:#c8855a;--accent2:#8faa8a;--accent3:#7ba3b8;--accent4:#c9a87c;
+  --male:#a8c5da;--female:#e8b4bc;--unk:#c8bfb4;
+  --shadow:rgba(100,70,50,.13);--r:16px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+header{background:var(--surface);border-bottom:1.5px solid var(--border);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 14px var(--shadow)}
+.logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--accent);display:flex;align-items:center;gap:7px}
+.ha{display:flex;gap:7px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:var(--rs);border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.81rem;font-weight:600;transition:all .18s;white-space:nowrap}
+.bp{background:var(--accent);color:#fff}.bp:hover{background:#b3714a;transform:translateY(-1px)}
+.bg{background:transparent;color:var(--text2);border:1.5px solid var(--border)}.bg:hover{background:var(--surface2)}
+.bd{background:#e87878;color:#fff}.bd:hover{background:#d05a5a}
+.bgr{background:var(--accent2);color:#fff}.bgr:hover{background:#7a9875}
+.bbl{background:var(--accent3);color:#fff}.bbl:hover{background:#5a8fb0}
+.bs{padding:5px 10px;font-size:.74rem}
+.bi{padding:7px;border-radius:50%;min-width:34px;min-height:34px;justify-content:center}
+.nav-tabs{display:flex;background:var(--surface);border-bottom:1.5px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{flex:1;min-width:60px;padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:.66rem;font-weight:600;color:var(--text3);transition:all .18s;border-bottom:3px solid transparent}
+.nav-tab .ti{font-size:1.1rem}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.panel{display:none;padding:14px}.panel.active{display:block}
+#treePanel{display:none;padding:0;flex-direction:column}#treePanel.active{display:flex}
+.si{display:flex;gap:8px;margin-bottom:12px}
+.si input{flex:1;padding:9px 13px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface);font-family:'Nunito',sans-serif;font-size:.86rem;color:var(--text);outline:none;transition:border .18s}
+.si input:focus{border-color:var(--accent)}
+.fc{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;margin-bottom:10px}
+.fc::-webkit-scrollbar{display:none}
+.chip{padding:4px 11px;border-radius:18px;font-size:.74rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);white-space:nowrap;transition:all .18s}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pl{display:flex;flex-direction:column;gap:9px}
+.pc{background:var(--surface);border-radius:var(--r);padding:11px 13px;border:1.5px solid var(--border);display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .18s}
+.pc:hover{border-color:var(--accent);transform:translateX(2px);box-shadow:0 2px 12px var(--shadow)}
+.pc.sel{border-color:var(--accent);background:#fff8f3}
+.av{width:50px;height:50px;border-radius:50%;flex-shrink:0;border:2.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.35rem;background:var(--unk);overflow:hidden}
+.av.m{background:var(--male);border-color:#90b5cc}.av.f{background:var(--female);border-color:#d89ea8}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pi{flex:1;min-width:0}
+.pn{font-family:'Playfair Display',serif;font-size:.93rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm{font-size:.73rem;color:var(--text3);margin-top:2px}
+.pb{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.badge{padding:2px 7px;border-radius:9px;font-size:.63rem;font-weight:700}
+.bl{background:#e8eef8;color:#4a5a8a}.bj{background:#e8f4e8;color:#4a7a4a}.bp2{background:#f0e8ff;color:#6a4a8a}
+.pca{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.bb{background:var(--accent);color:#fff;padding:9px 13px;border-radius:var(--rs);display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;font-size:.83rem;font-weight:600}
+.bb .ba{display:flex;gap:5px}
+.cb{width:21px;height:21px;border-radius:5px;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .18s}
+.cb.on{background:var(--accent);border-color:var(--accent);color:#fff;font-size:.78rem}
+/* TREE */
+#ttb{display:flex;gap:7px;align-items:center;padding:10px 14px;background:var(--surface);border-bottom:1.5px solid var(--border);flex-wrap:wrap;flex-shrink:0}
+#tc{flex:1;cursor:grab;display:block;background:var(--bg);touch-action:none;min-height:0}
+#tc.dg{cursor:grabbing}
+#th{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(61,47,35,.6);color:#fff;padding:6px 15px;border-radius:20px;font-size:.72rem;pointer-events:none;white-space:nowrap;transition:opacity 1s;z-index:10}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(60,40,25,.45);z-index:200;display:flex;align-items:flex-end;animation:fi .18s}
+@keyframes fi{from{opacity:0}}
+.md{background:var(--surface);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:18px 15px 30px;animation:su .22s}
+@keyframes su{from{transform:translateY(100%)}}
+.mh{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px}
+.mt{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--text);margin-bottom:14px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fgp{display:flex;flex-direction:column;gap:4px}
+.fgp.full{grid-column:1/-1}
+label{font-size:.73rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{padding:9px 11px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-family:'Nunito',sans-serif;font-size:.86rem;color:var(--text);outline:none;transition:border .18s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
+textarea{resize:vertical;min-height:65px}
+/* PHOTOS */
+.ps{margin-bottom:14px}
+.pmw{position:relative;border:2px dashed var(--border);border-radius:var(--rs);overflow:hidden;background:var(--surface2);transition:border .18s;cursor:pointer}
+.pmw:hover{border-color:var(--accent)}
+.pmw input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.pmw img.main{width:100%;height:165px;object-fit:cover;display:block}
+.pph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;gap:6px;color:var(--text3)}
+.pph .ic{font-size:2.5rem}
+.pcb{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:20px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer;z-index:3;font-family:'Nunito',sans-serif}
+.sd{margin:12px 0 8px;font-size:.73rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:7px}
+.sd::after{content:'';flex:1;height:1px;background:var(--border)}
+.gs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.gs::-webkit-scrollbar{display:none}
+.gt{width:58px;height:58px;border-radius:10px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;object-fit:cover;transition:all .18s}
+.gt:hover,.gt.mn{border-color:var(--accent);transform:scale(1.06)}
+.ga{width:58px;height:58px;border-radius:10px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--text3);cursor:pointer;flex-shrink:0;background:var(--surface2);position:relative;transition:border .18s}
+.ga:hover{border-color:var(--accent)}
+.ga input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.gw{position:relative;flex-shrink:0}
+.gd{position:absolute;top:-5px;right:-5px;width:17px;height:17px;background:#e87878;color:#fff;border-radius:50%;font-size:.58rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:4;font-weight:900}
+.ma{display:flex;gap:7px;margin-top:16px}
+.ma .btn{flex:1;justify-content:center}
+/* INLINE ADD SECTION */
+.inline-add{background:var(--surface2);border:1.5px dashed var(--border);border-radius:var(--rs);padding:10px 12px;margin-top:6px}
+.inline-add-title{font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.inline-add-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.inline-add-fields input{font-size:.8rem;padding:7px 9px}
+.inline-add-btn{margin-top:6px;display:flex;gap:6px}
+/* DETAIL */
+.dh{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+.da{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.9rem;border:3px solid var(--border);flex-shrink:0;overflow:hidden}
+.da img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.dn{font-family:'Playfair Display',serif;font-size:1.15rem}
+.ds{font-size:.8rem;color:var(--text2);margin-top:2px}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+.ii{background:var(--surface2);border-radius:var(--rs);padding:9px 11px}
+.il{font-size:.66rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.iv{font-size:.83rem;font-weight:600;color:var(--text);margin-top:2px}
+.ii.full{grid-column:1/-1}
+.rl{display:flex;flex-direction:column;gap:5px;margin-top:5px}
+.rc{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:var(--rs);background:var(--surface2);border:1.5px solid var(--border);cursor:pointer;transition:all .18s}
+.rc:hover{border-color:var(--accent)}
+.rca{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;overflow:hidden}
+.rca img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.rci{flex:1}.rcn{font-size:.8rem;font-weight:700;color:var(--text)}.rct{font-size:.68rem;color:var(--text3)}
+.dg2{display:flex;gap:6px;overflow-x:auto;padding:5px 0;scrollbar-width:none;margin-top:5px}
+.dg2::-webkit-scrollbar{display:none}
+.dg2 img{height:70px;width:70px;object-fit:cover;border-radius:10px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;transition:all .18s}
+.dg2 img:hover{border-color:var(--accent);transform:scale(1.05)}
+/* LIGHTBOX */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.lb img{max-width:95vw;max-height:80vh;object-fit:contain;border-radius:12px}
+.lbc{position:absolute;top:16px;right:16px;color:#fff;font-size:1.8rem;cursor:pointer;background:none;border:none;line-height:1}
+.lbn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:42px;height:42px;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lbn.lp{left:12px}.lbn.ln{right:12px}
+.lbcap{color:#fff;margin-top:10px;font-size:.82rem;opacity:.75;font-family:'Nunito',sans-serif}
+/* STATS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.sc{background:var(--surface);border-radius:var(--r);padding:14px;border:1.5px solid var(--border);text-align:center;transition:all .18s}
+.sc:hover{border-color:var(--accent4);transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+.sn{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--accent)}
+.sl{font-size:.73rem;color:var(--text3);font-weight:600;margin-top:2px}
+.sc.wide{grid-column:1/-1}
+.cbw{margin-bottom:18px}
+.cbt{font-weight:700;font-size:.8rem;color:var(--text2);margin-bottom:8px}
+.cbi{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.cbl{font-size:.73rem;color:var(--text2);width:76px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbtr{flex:1;background:var(--surface2);border-radius:5px;height:15px;overflow:hidden}
+.cbf{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.cbc{font-size:.7rem;color:var(--text3);width:22px}
+.life-card{background:var(--surface2);border-radius:var(--rs);padding:10px 12px;border:1.5px solid var(--border);margin-bottom:7px;cursor:pointer;transition:all .18s}
+.life-card:hover{border-color:var(--accent)}
+.life-name{font-size:.85rem;font-weight:700;color:var(--text)}
+.life-detail{font-size:.72rem;color:var(--text3);margin-top:2px}
+/* IMPORT / INFO */
+.iz{border:2.5px dashed var(--border);border-radius:var(--r);padding:36px 18px;text-align:center;background:var(--surface);cursor:pointer;transition:all .22s;position:relative}
+.iz:hover,.iz.do{border-color:var(--accent);background:#fff8f3}
+.iz h3{font-family:'Playfair Display',serif;color:var(--accent);margin-bottom:7px}
+.iz p{color:var(--text2);font-size:.83rem;margin-bottom:14px}
+.izi{font-size:2.8rem;margin-bottom:10px}
+#fi{position:absolute;inset:0;opacity:0;cursor:pointer}
+/* INFO CARD */
+.info-card{background:var(--surface);border-radius:var(--r);padding:16px;border:1.5px solid var(--border);margin-bottom:12px}
+.info-card h4{font-family:'Playfair Display',serif;color:var(--accent);font-size:1rem;margin-bottom:8px}
+.info-card p,.info-card li{font-size:.82rem;color:var(--text2);line-height:1.7}
+.info-card ul{padding-left:16px;margin-top:4px}
+.ver-badge{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:700;margin-left:6px}
+/* SETTINGS / EKSIK */
+.missing-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);background:var(--surface);border:1.5px solid var(--border);margin-bottom:7px;cursor:pointer;transition:all .18s}
+.missing-item:hover{border-color:var(--accent)}
+.missing-tag{padding:2px 8px;border-radius:7px;font-size:.63rem;font-weight:700;flex-shrink:0}
+.mt-name{background:#ffe8d0;color:#c06020}
+.mt-bd{background:#d0e8ff;color:#2060a0}
+.mt-ln{background:#e8d0ff;color:#6020a0}
+.mt-all{background:#ffe0e0;color:#a02020}
+.missing-name{font-size:.85rem;font-weight:700;color:var(--text);flex:1}
+.missing-detail{font-size:.72rem;color:var(--text3)}
+.settings-section{background:var(--surface);border-radius:var(--r);padding:14px;border:1.5px solid var(--border);margin-bottom:12px}
+.settings-section h4{font-family:'Playfair Display',serif;color:var(--text);font-size:.95rem;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.missing-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:9px 17px;border-radius:18px;font-size:.81rem;font-weight:600;z-index:500;animation:ti .22s,to .28s 2.2s forwards;white-space:nowrap}
+@keyframes ti{from{opacity:0;transform:translate(-50%,10px)}}
+@keyframes to{to{opacity:0;transform:translate(-50%,10px)}}
+.es{text-align:center;padding:48px 18px;color:var(--text3)}
+.es .ei{font-size:3.2rem;margin-bottom:12px}
+.es h3{font-family:'Playfair Display',serif;color:var(--text2);margin-bottom:5px}
+.es p{font-size:.83rem;margin-bottom:14px}
+.gt2{display:flex;gap:5px}
+.gb{flex:1;padding:7px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-size:.8rem;font-weight:600;text-align:center;transition:all .18s;color:var(--text2)}
+.gb.m.s{background:var(--male);border-color:#90b5cc;color:#2a5a7a}
+.gb.f.s{background:var(--female);border-color:#d89ea8;color:#7a2a3a}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+#authOverlay{position:fixed;inset:0;background:rgba(245,240,235,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px}
+.auth-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:40px 32px;text-align:center;max-width:360px;width:90%;box-shadow:0 8px 40px var(--shadow)}
+.auth-card h2{font-family:'Playfair Display',serif;color:var(--accent);margin-bottom:8px;font-size:1.8rem}
+.auth-card p{color:var(--text2);font-size:.9rem;margin-bottom:28px;line-height:1.6}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border-radius:var(--rs);border:1.5px solid var(--border);background:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:600;color:#3d2f23;transition:all .18s}
+.btn-google:hover{box-shadow:0 4px 16px var(--shadow);transform:translateY(-1px)}
+.btn-google svg{width:20px;height:20px;flex-shrink:0}
+#userInfo{display:none;align-items:center;gap:6px}
+#userInfo img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+#userInfo span{font-size:.75rem;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+<div id="authOverlay" style="display:none">
+  <div class="auth-card">
+    <div style="font-size:3rem;margin-bottom:12px">🌳</div>
+    <h2>Soy Ağacı</h2>
+    <p>Aile ağacınıza erişmek için<br>Google hesabınızla giriş yapın.</p>
+    <button class="btn-google" onclick="signInGoogle()">
+      <svg viewBox="0 0 48 48"><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2v6h7.8c4.5-4.2 7.1-10.4 7.1-17.2z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.8l-7.8-6c-2.1 1.4-4.8 2.3-7.9 2.3-6.1 0-11.2-4.1-13-9.6H3v6.2C6.9 42.7 14.9 48 24 48z"/><path fill="#FBBC05" d="M11 28.9c-.5-1.4-.7-2.8-.7-4.4s.2-3 .7-4.4v-6.2H3C1.1 17.5 0 20.6 0 24s1.1 6.5 3 8.9l8-6.2v2.2z"/><path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.5l6.6-6.6C35.8 2.5 30.4 0 24 0 14.9 0 6.9 5.3 3 13.1l8 6.2C12.8 13.6 17.9 9.5 24 9.5z"/></svg>
+      Google ile Giriş Yap
+    </button>
+  </div>
+</div>
+<header>
+  <div class="logo"><span>🌳</span>Soy Ağacı</div>
+  <div class="ha">
+    <div id="userInfo"></div>
+    <button class="btn bp bs" id="addBtn">+ Kişi</button>
+    <button class="btn bp bs" onclick="document.getElementById('gi2').click()">GED Yükle</button>
+    <input type="file" id="gi2" accept=".ged,.gedcom" style="display:none" onchange="handleGED(this)">
+  </div>
+</header>
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('list')" id="tab-list"><span class="ti">👥</span>Liste</button>
+  <button class="nav-tab" onclick="switchTab('tree')" id="tab-tree"><span class="ti">🌳</span>Ağaç</button>
+  <button class="nav-tab" onclick="switchTab('stats')" id="tab-stats"><span class="ti">📊</span>İstatistik</button>
+  <button class="nav-tab" onclick="switchTab('settings')" id="tab-settings"><span class="ti">⚙️</span>Ayarlar</button>
+  <button class="nav-tab" onclick="switchTab('info')" id="tab-info"><span class="ti">ℹ️</span>Bilgi</button>
+</nav>
+
+<!-- LIST -->
+<div class="panel active" id="listPanel">
+  <div class="si">
+    <input type="search" id="srch" placeholder="🔍 Kişi ara..." oninput="renderList()">
+    <button class="btn bg bs" onclick="toggleBulk()">☑️ Seç</button>
+  </div>
+  <div class="fc">
+    <div class="chip active" onclick="setF('all',this)">Tümü</div>
+    <div class="chip" onclick="setF('male',this)">👨 Erkek</div>
+    <div class="chip" onclick="setF('female',this)">👩 Kadın</div>
+    <div class="chip" onclick="setF('living',this)">💚 Hayatta</div>
+    <div class="chip" onclick="setF('deceased',this)">🕊️ Vefat</div>
+  </div>
+  <div id="bulkBar" style="display:none" class="bb">
+    <span id="bCnt">0 seçildi</span>
+    <div class="ba">
+      <button class="btn bs" style="background:#fff3;color:#fff" onclick="selAll()">Tümünü Seç</button>
+      <button class="btn bd bs" onclick="bulkDel()">Sil</button>
+    </div>
+  </div>
+  <div class="pl" id="pList"></div>
+</div>
+
+<!-- TREE -->
+<div class="panel" id="treePanel" style="height:calc(100vh - 112px);position:relative">
+  <div id="ttb">
+    <select id="focSel" onchange="focusPerson(this.value)" style="flex:1;min-width:90px;padding:6px 9px;font-size:.8rem"><option value="">— Kişiye odaklan —</option></select>
+    <button class="btn bg bs" onclick="zoomBy(-.15)">−</button>
+    <button class="btn bg bs" onclick="zoomBy(.15)">+</button>
+    <button class="btn bg bs" onclick="fitAll()">⛶</button>
+    <button class="btn bg bs" onclick="resetView()">⌂</button>
+    <button class="btn bg bs" title="Düzeni Sıfırla" onclick="resetLayout()">↺</button>
+    <button class="btn bgr bs" onclick="saveLayout()" title="Sürükle konumlarını kaydet">💾 Kaydet</button>
+  </div>
+  <canvas id="tc"></canvas>
+  <div id="th">🖐 Sürükle · Uzun bas → node taşı · 2× Tık = Kart Aç</div>
+</div>
+
+<!-- STATS -->
+<div class="panel" id="statsPanel"><div id="stCont"></div></div>
+
+<!-- SETTINGS -->
+<div class="panel" id="settingsPanel">
+  <div class="settings-section">
+    <h4>🔍 Eksik Veri Raporu</h4>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px">Aşağıdaki kişilerde bazı bilgiler eksik. Tıklayarak düzenleyebilirsiniz.</p>
+    <div class="missing-filters">
+      <div class="chip active" onclick="setMF('all',this)">Tümü</div>
+      <div class="chip" onclick="setMF('noName',this)">Ad Eksik</div>
+      <div class="chip" onclick="setMF('noLastName',this)">Soyad Eksik</div>
+      <div class="chip" onclick="setMF('noBirth',this)">Doğum Yok</div>
+      <div class="chip" onclick="setMF('noRelation',this)">Bağlantısız</div>
+    </div>
+    <div id="missingList"></div>
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="panel" id="infoPanel">
+  <div class="info-card">
+    <h4>🌳 Soy Ağacı Uygulaması <span class="ver-badge">v3.0</span></h4>
+    <p>Kişisel soy ağacınızı oluşturmak, düzenlemek ve görselleştirmek için geliştirilmiş tek dosya HTML uygulaması. İnternet bağlantısı gerektirmez, tüm veriler cihazınızda saklanır.</p>
+  </div>
+  <div class="info-card">
+    <h4>📋 Sürüm Geçmişi</h4>
+    <ul>
+      <li><strong>v3.0</strong> — Eksik veri raporu, inline kişi ekleme, bilgi & ayarlar menüsü, ağaç konum kaydetme, otomatik büyük harf, kızlık soyadı sadece kadınlara</li>
+      <li><strong>v2.5</strong> — Boşanmış eşler 💔, kızlık soyadı, çocuk sayısı rozeti, yaşam rekorları istatistiği</li>
+      <li><strong>v2.0</strong> — Canvas sürüklenebilir ağaç, node sürükleme, çift tık kart açma</li>
+      <li><strong>v1.5</strong> — Fotoğraf galerisi, lightbox, toplu silme</li>
+      <li><strong>v1.0</strong> — GED import/export, liste & ağaç görünümü, temel istatistikler</li>
+    </ul>
+  </div>
+  <div class="info-card">
+    <h4>✨ Özellikler</h4>
+    <ul>
+      <li>MyHeritage / Ancestry .ged dosyası içe aktarma</li>
+      <li>Sürüklenebilir canvas ağaç görünümü (pinch zoom, node taşıma)</li>
+      <li>Çoklu fotoğraf galerisi ve lightbox</li>
+      <li>Boşanmış eşler 💔, kızlık soyadı, evlilik durumu</li>
+      <li>İstatistikler: yaşam rekorları, isim frekansı, doğum dönemi grafiği</li>
+      <li>Eksik veri raporu (Ayarlar menüsü)</li>
+      <li>JSON ve GED formatında dışa aktarma</li>
+      <li>Tamamen çevrimdışı çalışır — veriler tarayıcıda saklanır</li>
+    </ul>
+  </div>
+  <div class="info-card">
+    <h4>📁 Veri İşlemleri</h4>
+    <div class="iz" id="impZone" style="padding:20px 14px;margin-bottom:10px">
+      <input type="file" id="fi" accept=".ged,.gedcom" onchange="handleGED(this)">
+      <div class="izi" style="font-size:2rem;margin-bottom:6px">📂</div>
+      <h3 style="font-size:.95rem">GED Dosyası Yükle</h3>
+      <p style="font-size:.78rem">MyHeritage veya diğer programlardan .ged sürükleyin / tıklayın.</p>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn bgr bs" onclick="loadDemo()">🎯 Demo Yükle</button>
+      <button class="btn bg bs" onclick="expJSON()">⬇️ JSON</button>
+      <button class="btn bg bs" onclick="expGED()">⬇️ GED</button>
+      <button class="btn bd bs" onclick="clearAll()">🗑️ Tümünü Sil</button>
+    </div>
+  </div>
+  <div class="info-card" style="font-size:.75rem;color:var(--text3);text-align:center">
+    <p>🌳 Soy Ağacı v3.0 · Tek dosya HTML · Tüm hakları saklıdır</p>
+    <p style="margin-top:4px">Veriler yalnızca bu cihazın tarayıcısında saklanır.</p>
+  </div>
+</div>
+
+<!-- MODAL: FORM -->
+<div class="mo" id="formModal" style="display:none" onclick="cModal('formModal')">
+ <div class="md" onclick="event.stopPropagation()">
+  <div class="mh"></div>
+  <div class="mt" id="formTitle">Yeni Kişi</div>
+  <div class="ps">
+    <div class="pmw" id="pmw">
+      <input type="file" id="pmi" accept="image/*" onchange="onMainFile(this)">
+      <img id="pmImg" class="main" style="display:none">
+      <div id="pph" class="pph"><span class="ic">🖼️</span><span>Ana fotoğraf ekle</span><span style="font-size:.7rem;color:var(--text3)">Tıkla veya sürükle</span></div>
+      <button class="pcb" id="pcb" style="display:none" onclick="event.stopPropagation();document.getElementById('pmi').click()">📷 Değiştir</button>
+    </div>
+    <div class="sd" style="margin-top:10px">Fotoğraf Galerisi</div>
+    <div class="gs" id="galStrip"></div>
+  </div>
+  <div class="sd">Kişisel Bilgiler</div>
+  <div class="fg">
+    <div class="fgp"><label>Ad</label><input id="f_fn" placeholder="Ad" oninput="autoCap(this)"></div>
+    <div class="fgp"><label>Soyad</label><input id="f_ln" placeholder="Soyad" oninput="autoCap(this)"></div>
+    <div class="fgp full"><label>Cinsiyet</label>
+      <div class="gt2">
+        <div class="gb m" onclick="setG('M')">👨 Erkek</div>
+        <div class="gb f" onclick="setG('F')">👩 Kadın</div>
+      </div>
+      <input type="hidden" id="f_g" value="M">
+    </div>
+    <div class="fgp"><label>Doğum Tarihi</label><input id="f_bd" placeholder="YYYY veya GG.AA.YYYY"></div>
+    <div class="fgp"><label>Doğum Yeri</label><input id="f_bp" placeholder="Şehir, Ülke" oninput="autoCap(this)"></div>
+    <div class="fgp"><label>Ölüm Tarihi</label><input id="f_dd" placeholder="GG.AA.YYYY"></div>
+    <div class="fgp"><label>Ölüm Yeri</label><input id="f_dp" placeholder="Şehir, Ülke" oninput="autoCap(this)"></div>
+    <div class="fgp full"><label>Meslek</label><input id="f_oc" placeholder="Meslek" oninput="autoCap(this)"></div>
+    <div class="fgp full" id="maidenRow" style="display:none"><label>Kızlık Soyadı</label><input id="f_ms" placeholder="Evlenmeden önceki soyad" oninput="autoCap(this)"></div>
+    <div class="fgp full"><label>Notlar</label><textarea id="f_no" placeholder="Ek bilgiler..."></textarea></div>
+  </div>
+  <div class="sd">Aile Bağlantıları</div>
+  <div class="fg">
+    <!-- ANNE -->
+    <div class="fgp full">
+      <label>Anne</label>
+      <select id="f_mo"><option value="">— Seçin —</option></select>
+      <div class="inline-add" id="ia_mo" style="display:none">
+        <div class="inline-add-title">➕ Yeni anne ekle &amp; bağla</div>
+        <div class="inline-add-fields">
+          <input id="ia_mo_fn" placeholder="Ad" oninput="autoCap(this)">
+          <input id="ia_mo_ln" placeholder="Soyad" oninput="autoCap(this)">
+          <input id="ia_mo_bd" placeholder="Doğum yılı" style="grid-column:1/-1">
+        </div>
+        <div class="inline-add-btn">
+          <button class="btn bbl bs" onclick="inlineAdd('mo')" style="flex:1">✅ Ekle &amp; Bağla</button>
+          <button class="btn bg bs" onclick="toggleIA('mo',false)">İptal</button>
+        </div>
+      </div>
+      <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('mo',true)">➕ Yeni Anne Ekle</button>
+    </div>
+    <!-- BABA -->
+    <div class="fgp full">
+      <label>Baba</label>
+      <select id="f_fa"><option value="">— Seçin —</option></select>
+      <div class="inline-add" id="ia_fa" style="display:none">
+        <div class="inline-add-title">➕ Yeni baba ekle &amp; bağla</div>
+        <div class="inline-add-fields">
+          <input id="ia_fa_fn" placeholder="Ad" oninput="autoCap(this)">
+          <input id="ia_fa_ln" placeholder="Soyad" oninput="autoCap(this)">
+          <input id="ia_fa_bd" placeholder="Doğum yılı" style="grid-column:1/-1">
+        </div>
+        <div class="inline-add-btn">
+          <button class="btn bbl bs" onclick="inlineAdd('fa')" style="flex:1">✅ Ekle &amp; Bağla</button>
+          <button class="btn bg bs" onclick="toggleIA('fa',false)">İptal</button>
+        </div>
+      </div>
+      <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('fa',true)">➕ Yeni Baba Ekle</button>
+    </div>
+    <!-- EŞ -->
+    <div class="fgp full">
+      <label>Eş / Eski Eş</label>
+      <select id="f_sp"><option value="">— Seçin —</option></select>
+      <div class="inline-add" id="ia_sp" style="display:none">
+        <div class="inline-add-title">➕ Yeni eş ekle &amp; bağla</div>
+        <div class="inline-add-fields">
+          <input id="ia_sp_fn" placeholder="Ad" oninput="autoCap(this)">
+          <input id="ia_sp_ln" placeholder="Soyad" oninput="autoCap(this)">
+          <input id="ia_sp_bd" placeholder="Doğum yılı" style="grid-column:1/-1">
+        </div>
+        <div class="inline-add-btn">
+          <button class="btn bbl bs" onclick="inlineAdd('sp')" style="flex:1">✅ Ekle &amp; Bağla</button>
+          <button class="btn bg bs" onclick="toggleIA('sp',false)">İptal</button>
+        </div>
+      </div>
+      <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('sp',true)">➕ Yeni Eş Ekle</button>
+    </div>
+    <div class="fgp full">
+      <label>Evlilik Durumu</label>
+      <select id="f_ms2">
+        <option value="married">Evli</option>
+        <option value="divorced">Boşanmış</option>
+        <option value="widowed">Dul</option>
+        <option value="partner">Birlikte</option>
+      </select>
+    </div>
+    <!-- ÇOCUK -->
+    <div class="fgp full">
+      <label>Çocuk Ekle</label>
+      <select id="f_ch" multiple style="min-height:80px"><option value="" disabled>Ctrl/Cmd ile birden fazla seçin</option></select>
+      <div class="inline-add" id="ia_ch" style="display:none">
+        <div class="inline-add-title">➕ Yeni çocuk ekle &amp; bağla</div>
+        <div class="inline-add-fields">
+          <input id="ia_ch_fn" placeholder="Ad" oninput="autoCap(this)">
+          <input id="ia_ch_ln" placeholder="Soyad" oninput="autoCap(this)">
+          <input id="ia_ch_bd" placeholder="Doğum yılı" style="grid-column:1/-1">
+        </div>
+        <div class="inline-add-btn">
+          <button class="btn bbl bs" onclick="inlineAdd('ch')" style="flex:1">✅ Ekle &amp; Bağla</button>
+          <button class="btn bg bs" onclick="toggleIA('ch',false)">İptal</button>
+        </div>
+      </div>
+      <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('ch',true)">➕ Yeni Çocuk Ekle</button>
+    </div>
+  </div>
+  <div class="ma">
+    <button class="btn bg" onclick="cModal('formModal')">İptal</button>
+    <button class="btn bp" onclick="savePerson()">💾 Kaydet</button>
+  </div>
+ </div>
+</div>
+
+<!-- MODAL: DETAIL -->
+<div class="mo" id="detModal" style="display:none" onclick="cModal('detModal')">
+  <div class="md" onclick="event.stopPropagation()" id="detCont"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lbox" style="display:none">
+  <button class="lbc" onclick="closeLB()">✕</button>
+  <button class="lbn lp" onclick="lbNav(-1)">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lbn ln" onclick="lbNav(1)">›</button>
+  <div class="lbcap" id="lbCap"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════
+const SUPA_URL='https://nzmxjompdipabkvocfio.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bXhqb21wZGlwYWJrdm9jZmlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NTQzMjgsImV4cCI6MjA5NDEzMDMyOH0.EgM3hCU_8Q6qjYvMLCR9T17eIvZimPrmxLUQrCdQMaI';
+const supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+let supaUser=null,saveTimer=null;
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+const APP_VER='3.0';
+let people={},fams={},nextId=1;
+let filt='all',bulkMode=false,selIds=new Set();
+let editId=null,mainPhoto=null,gal=[];
+let missFilt='all';
+
+function newId(){return 'P'+(nextId++);}
+
+function save(){
+  try{localStorage.setItem('sa4',JSON.stringify({people,fams,nextId}));}catch(e){}
+  if(!supaUser)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    try{await supa.from('family_data').upsert({user_id:supaUser.id,people,fams,next_id:nextId},{onConflict:'user_id'});}
+    catch(e){console.error('Kaydetme hatası:',e);}
+  },800);
+}
+
+function migrateData(){
+  Object.values(people).forEach(p=>{
+    if(!p.gallery)p.gallery=[];
+    if(!p.maidenName)p.maidenName='';
+    if(!p.maritalStatus)p.maritalStatus='married';
+    if(!p.spouses)p.spouses=p.spouse?[{id:p.spouse,status:p.maritalStatus}]:[];
+    if(!p.children)p.children=[];
+    if(p.gender==='U')p.gender='M';
+  });
+}
+
+async function load(){
+  if(supaUser){
+    try{
+      const {data}=await supa.from('family_data').select('people,fams,next_id').eq('user_id',supaUser.id).single();
+      if(data){people=data.people||{};fams=data.fams||{};nextId=data.next_id||1;migrateData();return;}
+    }catch(e){}
+  }
+  try{const d=localStorage.getItem('sa4');if(d){const o=JSON.parse(d);people=o.people||{};fams=o.fams||{};nextId=o.nextId||1;}}catch(e){}
+  migrateData();
+}
+
+// ── AUTO-CAP ──
+function autoCap(el){
+  const v=el.value;
+  if(!v)return;
+  // Capitalize first letter of each word
+  el.value=v.replace(/(?:^|[\s\-])\S/g,c=>c.toUpperCase());
+}
+function capStr(s){
+  if(!s)return s;
+  return s.replace(/(?:^|[\s\-])\S/g,c=>c.toUpperCase());
+}
+
+// ── GED PARSER ──
+function parseGED(txt){
+  const lines=txt.split(/\r?\n/);
+  let cur=null,tag=null,tP={},tF={};
+  function g(r){return r.replace(/@/g,'');}
+  for(const line of lines){
+    const m=line.match(/^(\d+)\s+(@[^@]+@)?\s*(\w+)\s*(.*)?$/);
+    if(!m)continue;
+    const lv=+m[1],ref=m[2]?m[2].trim():null,t=m[3],v=(m[4]||'').trim();
+    if(lv===0){
+      cur=null;tag=null;
+      if(ref&&t==='INDI'){cur={_t:'I',_id:g(ref)};tP[cur._id]=cur;}
+      else if(ref&&t==='FAM'){cur={_t:'F',_id:g(ref),div:false};tF[cur._id]=cur;}
+      continue;
+    }
+    if(!cur)continue;
+    if(cur._t==='I'){
+      if(lv===1&&t==='NAME'){const p=v.replace(/\//g,'').trim().split(/\s+/);cur.fn=p.slice(0,-1).join(' ')||p[0]||'';cur.ln=p.length>1?p[p.length-1]:'';}
+      if(lv===1&&t==='SEX')cur.gn=v==='M'?'M':'F';
+      if(lv===1&&(t==='BIRT'||t==='DEAT'||t==='OCCU'||t==='NOTE')){tag=t;if(t==='OCCU')cur.oc=v;if(t==='NOTE')cur.no=(cur.no||'')+v+' ';}
+      if(lv===2&&tag==='BIRT'&&t==='DATE')cur.bd=v;
+      if(lv===2&&tag==='BIRT'&&t==='PLAC')cur.bp=v;
+      if(lv===2&&tag==='DEAT'&&t==='DATE')cur.dd=v;
+      if(lv===2&&tag==='DEAT'&&t==='PLAC')cur.dp=v;
+      if(lv===1&&!['BIRT','DEAT','OCCU','NOTE'].includes(t))tag=null;
+    }
+    if(cur._t==='F'){
+      if(lv===1&&t==='HUSB')cur.h=g(v);
+      if(lv===1&&t==='WIFE')cur.w=g(v);
+      if(lv===1&&t==='CHIL'){if(!cur.c)cur.c=[];cur.c.push(g(v));}
+      if(lv===1&&t==='DIV')cur.div=true;
+    }
+  }
+  people={};fams={};nextId=1;
+  const im={};
+  for(const gid of Object.keys(tP)){const pid=newId();im[gid]=pid;}
+  for(const[gid,src]of Object.entries(tP)){
+    const pid=im[gid];
+    people[pid]={id:pid,firstName:capStr(src.fn||''),lastName:capStr(src.ln||''),gender:src.gn||'M',
+      birthDate:src.bd||'',birthPlace:capStr(src.bp||''),deathDate:src.dd||'',deathPlace:capStr(src.dp||''),
+      occupation:capStr(src.oc||''),notes:(src.no||'').trim(),maidenName:'',maritalStatus:'married',
+      photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
+  }
+  for(const fam of Object.values(tF)){
+    const h=fam.h?im[fam.h]:null,w=fam.w?im[fam.w]:null;
+    const ch=(fam.c||[]).map(x=>im[x]).filter(Boolean);
+    const div=fam.div;
+    if(h&&w){
+      const ms=div?'divorced':'married';
+      if(people[h]){if(!people[h].spouses.find(s=>s.id===w))people[h].spouses.push({id:w,status:ms});people[h].spouse=w;}
+      if(people[w]){if(!people[w].spouses.find(s=>s.id===h))people[w].spouses.push({id:h,status:ms});people[w].spouse=h;}
+    }
+    for(const cid of ch){
+      if(!people[cid])continue;
+      if(h){people[cid].father=h;if(people[h]&&!people[h].children.includes(cid))people[h].children.push(cid);}
+      if(w){people[cid].mother=w;if(people[w]&&!people[w].children.includes(cid))people[w].children.push(cid);}
+    }
+  }
+  Object.values(people).forEach(p=>{p.children=[...new Set(p.children)];});
+  save();toast(`✅ ${Object.keys(people).length} kişi aktarıldı`);
+  renderAll();buildTree();
+}
+
+// ══════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════
+function switchTab(t){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById(t+'Panel').classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='stats')renderStats();
+  if(t==='tree'){resizeCanvas();buildTree();schedHide();}
+  if(t==='settings')renderMissing();
+}
+
+// ══════════════════════════════════════
+//  LIST
+// ══════════════════════════════════════
+function setF(f,el){filt=f;document.querySelectorAll('#listPanel .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderList();}
+function getFilt(){
+  const q=(document.getElementById('srch').value||'').toLowerCase();
+  return Object.values(people).filter(p=>{
+    const n=(p.firstName+' '+p.lastName+(p.maidenName?' '+p.maidenName:'')).toLowerCase();
+    if(q&&!n.includes(q))return false;
+    if(filt==='male'&&p.gender!=='M')return false;
+    if(filt==='female'&&p.gender!=='F')return false;
+    if(filt==='living'&&p.deathDate)return false;
+    if(filt==='deceased'&&!p.deathDate)return false;
+    return true;
+  }).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName,'tr'));
+}
+function renderList(){
+  const el=document.getElementById('pList');
+  const list=getFilt();
+  if(!Object.keys(people).length){
+    el.innerHTML=`<div class="es"><div class="ei">👨‍👩‍👧‍👦</div><h3>Henüz kimse yok</h3><p>GED dosyası yükleyin veya kişi ekleyin.</p><button class="btn bp" onclick="openForm()">+ Kişi Ekle</button></div>`;return;
+  }
+  if(!list.length){el.innerHTML=`<div class="es"><div class="ei">🔍</div><h3>Sonuç yok</h3></div>`;return;}
+  el.innerHTML=list.map(p=>{
+    const bg=p.gender==='M'?'m':'f';
+    const em=p.gender==='M'?'👨':'👩';
+    const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';
+    const maiden=p.maidenName&&p.gender==='F'?` <span style="font-size:.73rem;color:var(--text3);font-weight:400">(d.${p.maidenName})</span>`:'';
+    const dt=[p.birthDate,p.deathDate?'† '+p.deathDate:''].filter(Boolean).join(' — ');
+    const gc=(p.gallery||[]).length;
+    const chk=selIds.has(p.id);
+    const isDivorced=(p.spouses||[]).some(s=>s.status==='divorced');
+    return `<div class="pc${chk?' sel':''}" onclick="cardClick('${p.id}',event)">
+      ${bulkMode?`<div class="cb${chk?' on':''}" onclick="togSel('${p.id}',event)">${chk?'✓':''}</div>`:''}
+      <div class="av ${bg}">${p.photo?`<img src="${p.photo}">`:`${em}`}</div>
+      <div class="pi">
+        <div class="pn">${nm}${maiden}</div>
+        <div class="pm">${dt||'—'}</div>
+        <div class="pb">
+          ${p.birthPlace?`<span class="badge bl">📍${p.birthPlace.split(',')[0]}</span>`:''}
+          ${p.occupation?`<span class="badge bj">💼${p.occupation}</span>`:''}
+          ${gc?`<span class="badge bp2">🖼️${gc}</span>`:''}
+          ${isDivorced?`<span class="badge" style="background:#ffe8e8;color:#c05050">💔</span>`:''}
+        </div>
+      </div>
+      <div class="pca" onclick="event.stopPropagation()">
+        <button class="btn bg bs bi" onclick="openForm('${p.id}')">✏️</button>
+        <button class="btn bg bs bi" onclick="cfmDel('${p.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function cardClick(id,e){if(bulkMode){togSel(id,e);return;}openDetail(id);}
+function toggleBulk(){bulkMode=!bulkMode;selIds.clear();document.getElementById('bulkBar').style.display=bulkMode?'flex':'none';renderList();}
+function togSel(id,e){e.stopPropagation();selIds.has(id)?selIds.delete(id):selIds.add(id);document.getElementById('bCnt').textContent=selIds.size+' seçildi';renderList();}
+function selAll(){getFilt().forEach(p=>selIds.add(p.id));document.getElementById('bCnt').textContent=selIds.size+' seçildi';renderList();}
+function bulkDel(){
+  if(!selIds.size){toast('Hiç seçilmedi');return;}
+  if(!confirm(selIds.size+' kişiyi silmek istiyor musunuz?'))return;
+  selIds.forEach(id=>delP(id));selIds.clear();bulkMode=false;
+  document.getElementById('bulkBar').style.display='none';
+  save();renderAll();buildTree();toast('🗑️ Silindi');
+}
+
+// ══════════════════════════════════════
+//  PHOTOS
+// ══════════════════════════════════════
+function onMainFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>applyMain(e.target.result);r.readAsDataURL(f);inp.value='';}
+function applyMain(d){mainPhoto=d;if(!gal.includes(d))gal.unshift(d);showMain(d);renderGal();}
+function showMain(s){document.getElementById('pmImg').src=s;document.getElementById('pmImg').style.display='block';document.getElementById('pph').style.display='none';document.getElementById('pcb').style.display='block';}
+function hideMain(){document.getElementById('pmImg').style.display='none';document.getElementById('pph').style.display='flex';document.getElementById('pcb').style.display='none';}
+function addGalFiles(inp){
+  const fs=Array.from(inp.files);if(!fs.length)return;
+  let n=0;fs.forEach(f=>{const r=new FileReader();r.onload=e=>{if(!gal.includes(e.target.result))gal.push(e.target.result);n++;if(n===fs.length){renderGal();toast(`📷 ${n} fotoğraf`);}};r.readAsDataURL(f);});inp.value='';
+}
+function remGal(i){const wm=gal[i]===mainPhoto;gal.splice(i,1);if(wm){mainPhoto=gal.length?gal[0]:null;mainPhoto?showMain(mainPhoto):hideMain();}renderGal();}
+function setMain(i){mainPhoto=gal[i];showMain(mainPhoto);renderGal();}
+function renderGal(){
+  const s=document.getElementById('galStrip');
+  s.innerHTML=gal.map((src,i)=>`<div class="gw"><img src="${src}" class="gt${src===mainPhoto?' mn':''}" onclick="setMain(${i})" title="Ana yap"><div class="gd" onclick="remGal(${i})">✕</div></div>`).join('')+
+    `<div class="ga" title="Ekle"><input type="file" accept="image/*" multiple onchange="addGalFiles(this)">＋</div>`;
+}
+(()=>{const w=document.getElementById('pmw');w.addEventListener('dragover',e=>{e.preventDefault();w.style.borderColor='var(--accent)';});w.addEventListener('dragleave',()=>{w.style.borderColor='';});w.addEventListener('drop',e=>{e.preventDefault();w.style.borderColor='';const f=e.dataTransfer.files[0];if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>applyMain(ev.target.result);r.readAsDataURL(f);});})();
+
+// ══════════════════════════════════════
+//  INLINE ADD helpers
+// ══════════════════════════════════════
+function toggleIA(role,show){
+  document.getElementById('ia_'+role).style.display=show?'block':'none';
+  if(show){
+    document.getElementById('ia_'+role+'_fn').value='';
+    document.getElementById('ia_'+role+'_ln').value='';
+    document.getElementById('ia_'+role+'_bd').value='';
+    document.getElementById('ia_'+role+'_fn').focus();
+  }
+}
+function inlineAdd(role){
+  const fn=capStr(document.getElementById('ia_'+role+'_fn').value.trim());
+  const ln=capStr(document.getElementById('ia_'+role+'_ln').value.trim());
+  if(!fn&&!ln){toast('⚠️ Ad veya soyad girin');return;}
+  const bd=document.getElementById('ia_'+role+'_bd').value.trim();
+  const gender=role==='mo'?'F':role==='fa'?'M':'M';
+  const id=newId();
+  people[id]={id,firstName:fn,lastName:ln,gender,birthDate:bd,birthPlace:'',
+    deathDate:'',deathPlace:'',occupation:'',maidenName:'',maritalStatus:'married',
+    notes:'',photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
+  save();
+  // Refresh the relevant select and pre-select new person
+  const others=Object.values(people).filter(x=>x.id!==editId);
+  const selId=role==='mo'?'f_mo':role==='fa'?'f_fa':role==='sp'?'f_sp':'f_ch';
+  const opts='<option value="">— Seçin —</option>'+others.map(x=>`<option value="${x.id}">${[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
+  document.getElementById(selId).innerHTML=opts;
+  document.getElementById(selId).value=id;
+  toggleIA(role,false);
+  renderAll();
+  toast(`✅ ${fn} ${ln} eklendi`);
+}
+
+// ══════════════════════════════════════
+//  PERSON FORM
+// ══════════════════════════════════════
+function openForm(id){
+  editId=id||null;mainPhoto=null;gal=[];
+  document.getElementById('formTitle').textContent=id?'Kişiyi Düzenle':'Yeni Kişi';
+  const p=id?people[id]:null;
+  const others=Object.values(people).filter(x=>x.id!==id);
+  const opts='<option value="">— Seçin —</option>'+others.map(x=>`<option value="${x.id}">${[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
+  ['f_mo','f_fa','f_sp'].forEach(s=>document.getElementById(s).innerHTML=opts);
+  // Children multi-select
+  document.getElementById('f_ch').innerHTML=others.map(x=>`<option value="${x.id}">${[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
+
+  const gender=p?p.gender:'M';
+  // Show/hide maiden name based on gender
+  document.getElementById('maidenRow').style.display=(gender==='F')?'flex':'none';
+
+  if(p){
+    document.getElementById('f_fn').value=p.firstName||'';
+    document.getElementById('f_ln').value=p.lastName||'';
+    setG(p.gender||'M');
+    document.getElementById('f_bd').value=p.birthDate||'';
+    document.getElementById('f_bp').value=p.birthPlace||'';
+    document.getElementById('f_dd').value=p.deathDate||'';
+    document.getElementById('f_dp').value=p.deathPlace||'';
+    document.getElementById('f_oc').value=p.occupation||'';
+    document.getElementById('f_ms').value=p.maidenName||'';
+    document.getElementById('f_no').value=p.notes||'';
+    document.getElementById('f_mo').value=p.mother||'';
+    document.getElementById('f_fa').value=p.father||'';
+    const curSp=(p.spouses||[])[0];
+    document.getElementById('f_sp').value=curSp?curSp.id:'';
+    document.getElementById('f_ms2').value=curSp?curSp.status:'married';
+    // Pre-select children
+    const chSel=document.getElementById('f_ch');
+    Array.from(chSel.options).forEach(opt=>{opt.selected=(p.children||[]).includes(opt.value);});
+    gal=[...(p.gallery||[])];mainPhoto=p.photo||null;
+    if(mainPhoto&&!gal.includes(mainPhoto))gal.unshift(mainPhoto);
+    mainPhoto?showMain(mainPhoto):hideMain();
+  } else {
+    ['f_fn','f_ln','f_bd','f_bp','f_dd','f_dp','f_oc','f_ms','f_no'].forEach(i=>document.getElementById(i).value='');
+    setG('M');hideMain();
+    ['f_mo','f_fa','f_sp'].forEach(s=>document.getElementById(s).value='');
+    document.getElementById('f_ms2').value='married';
+  }
+  // Hide inline add sections
+  ['mo','fa','sp','ch'].forEach(r=>toggleIA(r,false));
+  renderGal();
+  document.getElementById('formModal').style.display='flex';
+}
+function setG(g){
+  document.getElementById('f_g').value=g;
+  document.querySelectorAll('.gb').forEach(b=>b.classList.remove('s'));
+  document.querySelector('.gb.'+(g==='M'?'m':'f')).classList.add('s');
+  document.getElementById('maidenRow').style.display=(g==='F')?'flex':'none';
+}
+function savePerson(){
+  const fn=capStr(document.getElementById('f_fn').value.trim());
+  const ln=capStr(document.getElementById('f_ln').value.trim());
+  if(!fn&&!ln){toast('⚠️ Ad veya soyad girin');return;}
+  const id=editId||newId();
+  const old=people[id];
+  if(old){
+    if(old.mother&&people[old.mother])people[old.mother].children=people[old.mother].children.filter(c=>c!==id);
+    if(old.father&&people[old.father])people[old.father].children=people[old.father].children.filter(c=>c!==id);
+    (old.spouses||[]).forEach(s=>{if(people[s.id]){people[s.id].spouses=(people[s.id].spouses||[]).filter(x=>x.id!==id);if(!people[s.id].spouses.length)people[s.id].spouse=null;}});
+    // Remove old child links
+    (old.children||[]).forEach(cid=>{if(people[cid]){if(people[cid].mother===id)people[cid].mother=null;if(people[cid].father===id)people[cid].father=null;}});
+  }
+  const mo=document.getElementById('f_mo').value;
+  const fa=document.getElementById('f_fa').value;
+  const sp=document.getElementById('f_sp').value;
+  const ms=document.getElementById('f_ms2').value;
+  // Collect selected children
+  const chSel=document.getElementById('f_ch');
+  const newChildren=Array.from(chSel.selectedOptions).map(o=>o.value).filter(Boolean);
+  const g=document.getElementById('f_g').value;
+  people[id]={id,firstName:fn,lastName:ln,gender:g,
+    birthDate:document.getElementById('f_bd').value.trim(),
+    birthPlace:capStr(document.getElementById('f_bp').value.trim()),
+    deathDate:document.getElementById('f_dd').value.trim(),
+    deathPlace:capStr(document.getElementById('f_dp').value.trim()),
+    occupation:capStr(document.getElementById('f_oc').value.trim()),
+    maidenName:g==='F'?capStr(document.getElementById('f_ms').value.trim()):'',
+    notes:document.getElementById('f_no').value.trim(),
+    maritalStatus:ms,photo:mainPhoto,gallery:[...new Set(gal)],
+    mother:mo||null,father:fa||null,spouse:sp||null,
+    spouses:sp?[{id:sp,status:ms}]:[],children:newChildren};
+  if(mo&&people[mo]&&!people[mo].children.includes(id))people[mo].children.push(id);
+  if(fa&&people[fa]&&!people[fa].children.includes(id))people[fa].children.push(id);
+  if(sp&&people[sp]){
+    if(!people[sp].spouses)people[sp].spouses=[];
+    if(!people[sp].spouses.find(s=>s.id===id))people[sp].spouses.push({id,status:ms});
+    people[sp].spouse=id;people[sp].maritalStatus=ms;
+  }
+  // Link children
+  newChildren.forEach(cid=>{
+    if(!people[cid])return;
+    if(g==='F'&&people[cid].mother!==id)people[cid].mother=id;
+    if(g==='M'&&people[cid].father!==id)people[cid].father=id;
+  });
+  save();cModal('formModal');renderAll();buildTree();
+  toast(editId?'✅ Güncellendi':'✅ Eklendi');
+}
+
+// ══════════════════════════════════════
+//  DELETE
+// ══════════════════════════════════════
+function delP(id){
+  const p=people[id];if(!p)return;
+  if(p.mother&&people[p.mother])people[p.mother].children=people[p.mother].children.filter(c=>c!==id);
+  if(p.father&&people[p.father])people[p.father].children=people[p.father].children.filter(c=>c!==id);
+  (p.spouses||[]).forEach(s=>{if(people[s.id]){people[s.id].spouses=(people[s.id].spouses||[]).filter(x=>x.id!==id);if(!people[s.id].spouses.length)people[s.id].spouse=null;}});
+  (p.children||[]).forEach(cid=>{if(people[cid]){if(people[cid].mother===id)people[cid].mother=null;if(people[cid].father===id)people[cid].father=null;}});
+  delete people[id];
+}
+function cfmDel(id){
+  const p=people[id];if(!p)return;
+  if(!confirm(([p.firstName,p.lastName].filter(Boolean).join(' ')||'bu kişiyi')+' silmek istiyor musunuz?'))return;
+  delP(id);save();renderAll();buildTree();cModal('detModal');cModal('formModal');toast('🗑️ Silindi');
+}
+
+// ══════════════════════════════════════
+//  DETAIL MODAL
+// ══════════════════════════════════════
+function openDetail(id){
+  const p=people[id];if(!p)return;
+  const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';
+  const bg=p.gender==='M'?'var(--male)':'var(--female)';
+  const em=p.gender==='M'?'👨':'👩';
+  const by=(p.birthDate||'').match(/\d{4}/)?.[0];
+  const dy=(p.deathDate||'').match(/\d{4}/)?.[0];
+  let ageStr='';
+  if(by&&dy)ageStr=`${+dy-+by} yıl yaşadı`;
+  else if(by)ageStr=`${new Date().getFullYear()-+by} yaşında`;
+
+  function chip(rid,lbl){
+    if(!rid||!people[rid])return'';
+    const r=people[rid],rn=[r.firstName,r.lastName].filter(Boolean).join(' ')||'İsimsiz';
+    const rb=r.gender==='M'?'var(--male)':'var(--female)';
+    return`<div class="rc" onclick="cModal('detModal');setTimeout(()=>openDetail('${rid}'),100)">
+      <div class="rca" style="background:${rb}">${r.photo?`<img src="${r.photo}">`:(r.gender==='M'?'👨':'👩')}</div>
+      <div class="rci"><div class="rcn">${rn}</div><div class="rct">${lbl}</div></div>
+      <span style="color:var(--text3)">›</span></div>`;
+  }
+  const gals=[...(p.gallery||[])];if(p.photo&&!gals.includes(p.photo))gals.unshift(p.photo);
+  const galH=gals.length?`<div class="sd">Fotoğraflar (${gals.length})</div><div class="dg2">${gals.map((s,i)=>`<img src="${s}" onclick="openLB('${id}',${i})">`).join('')}</div>`:'';
+  const spChips=(p.spouses||[]).filter(s=>people[s.id]).map(s=>{
+    const r=people[s.id],rn=[r.firstName,r.lastName].filter(Boolean).join(' ')||'İsimsiz';
+    const rb=r.gender==='M'?'var(--male)':'var(--female)';
+    const slbl=s.status==='divorced'?'💔 Eski Eş (Boşanmış)':s.status==='widowed'?'🕊️ Eş (Dul)':s.status==='partner'?'🤝 Partner':'💑 Eş';
+    return`<div class="rc" onclick="cModal('detModal');setTimeout(()=>openDetail('${s.id}'),100)">
+      <div class="rca" style="background:${rb}">${r.photo?`<img src="${r.photo}">`:(r.gender==='M'?'👨':'👩')}</div>
+      <div class="rci"><div class="rcn">${rn}</div><div class="rct">${slbl}</div></div>
+      <span style="color:var(--text3)">›</span></div>`;
+  }).join('');
+  const kids=(p.children||[]).filter(c=>people[c]);
+  document.getElementById('detCont').innerHTML=`
+    <div class="mh"></div>
+    <div class="dh">
+      <div class="da" style="background:${bg}">${p.photo?`<img src="${p.photo}">`:`${em}`}</div>
+      <div>
+        <div class="dn">${nm}</div>
+        ${p.maidenName&&p.gender==='F'?`<div class="ds" style="font-style:italic">d. ${p.maidenName}</div>`:''}
+        <div class="ds">${p.gender==='M'?'Erkek':'Kadın'}${p.occupation?' · '+p.occupation:''}</div>
+        ${ageStr?`<div style="font-size:.72rem;color:var(--accent);margin-top:2px">⏳ ${ageStr}</div>`:''}
+        ${gals.length?`<div style="font-size:.72rem;color:var(--text3);margin-top:2px">🖼️ ${gals.length} fotoğraf</div>`:''}
+      </div>
+    </div>
+    ${galH}
+    <div class="ig">
+      <div class="ii"><div class="il">Doğum</div><div class="iv">${p.birthDate||'—'}</div></div>
+      <div class="ii"><div class="il">Doğum Yeri</div><div class="iv">${p.birthPlace||'—'}</div></div>
+      <div class="ii"><div class="il">Ölüm</div><div class="iv">${p.deathDate||'—'}</div></div>
+      <div class="ii"><div class="il">Ölüm Yeri</div><div class="iv">${p.deathPlace||'—'}</div></div>
+      ${p.notes?`<div class="ii full"><div class="il">Notlar</div><div class="iv" style="font-weight:400;white-space:pre-wrap">${p.notes}</div></div>`:''}
+    </div>
+    <div class="sd">Aile (${kids.length} çocuk)</div>
+    <div class="rl">
+      ${chip(p.father,'Baba')}${chip(p.mother,'Anne')}${spChips}
+      ${kids.map(c=>chip(c,'Çocuk')).join('')}
+      ${!p.father&&!p.mother&&!(p.spouses||[]).length&&!kids.length?'<p style="color:var(--text3);font-size:.8rem;padding:6px 0">Bağlantı yok</p>':''}
+    </div>
+    <div class="ma">
+      <button class="btn bg" onclick="cModal('detModal')">Kapat</button>
+      <button class="btn bg" onclick="cModal('detModal');setTimeout(()=>openForm('${id}'),100)">✏️ Düzenle</button>
+      <button class="btn bd" onclick="cfmDel('${id}')">🗑️ Sil</button>
+    </div>`;
+  document.getElementById('detModal').style.display='flex';
+}
+
+// ══════════════════════════════════════
+//  LIGHTBOX
+// ══════════════════════════════════════
+let lbA=[],lbI=0,lbNm='';
+function openLB(pid,i){const p=people[pid];if(!p)return;lbNm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';lbA=[...(p.gallery||[])];if(p.photo&&!lbA.includes(p.photo))lbA.unshift(p.photo);lbI=i;showLB();}
+function showLB(){document.getElementById('lbImg').src=lbA[lbI];document.getElementById('lbCap').textContent=`${lbNm}  ·  ${lbI+1} / ${lbA.length}`;document.getElementById('lbox').style.display='flex';}
+function lbNav(d){lbI=(lbI+d+lbA.length)%lbA.length;showLB();}
+function closeLB(){document.getElementById('lbox').style.display='none';}
+document.getElementById('lbox').addEventListener('click',e=>{if(e.target===document.getElementById('lbox'))closeLB();});
+document.addEventListener('keydown',e=>{if(document.getElementById('lbox').style.display==='flex'){if(e.key==='ArrowRight')lbNav(1);else if(e.key==='ArrowLeft')lbNav(-1);else if(e.key==='Escape')closeLB();}});
+
+// ══════════════════════════════════════
+//  MISSING DATA (Ayarlar)
+// ══════════════════════════════════════
+function setMF(f,el){
+  missFilt=f;
+  document.querySelectorAll('#settingsPanel .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderMissing();
+}
+function renderMissing(){
+  const pl=Object.values(people);
+  const el=document.getElementById('missingList');
+  if(!pl.length){el.innerHTML=`<div class="es" style="padding:20px"><div class="ei">✅</div><h3>Veri yok</h3><p>Önce kişi ekleyin.</p></div>`;return;}
+
+  const items=pl.map(p=>{
+    const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';
+    const missing=[];
+    if(!p.firstName)missing.push({tag:'mt-name',label:'Ad yok'});
+    if(!p.lastName)missing.push({tag:'mt-ln',label:'Soyad yok'});
+    if(!p.birthDate)missing.push({tag:'mt-bd',label:'Doğum tarihi yok'});
+    if(!p.father&&!p.mother&&!(p.spouses||[]).length&&!(p.children||[]).length)
+      missing.push({tag:'mt-all',label:'Bağlantısız'});
+    return{p,nm,missing};
+  }).filter(x=>{
+    if(missFilt==='all')return x.missing.length>0;
+    if(missFilt==='noName')return!x.p.firstName;
+    if(missFilt==='noLastName')return!x.p.lastName;
+    if(missFilt==='noBirth')return!x.p.birthDate;
+    if(missFilt==='noRelation')return!x.p.father&&!x.p.mother&&!(x.p.spouses||[]).length&&!(x.p.children||[]).length;
+    return true;
+  }).sort((a,b)=>b.missing.length-a.missing.length);
+
+  if(!items.length){
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--accent2);font-size:.9rem">✅ Bu kategoride eksik veri yok!</div>`;return;
+  }
+  el.innerHTML=`<div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">${items.length} kişide eksik bilgi bulundu</div>`+
+  items.map(({p,nm,missing})=>`
+    <div class="missing-item" onclick="cModal('detModal');openDetail('${p.id}')">
+      <div style="flex:1">
+        <div class="missing-name">${nm}</div>
+        <div class="missing-detail">${p.birthDate||'Doğum tarihi yok'} · ${p.gender==='M'?'Erkek':'Kadın'}</div>
+      </div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:120px">
+        ${missing.map(m=>`<span class="missing-tag ${m.tag}">${m.label}</span>`).join('')}
+      </div>
+      <span style="color:var(--text3);font-size:.9rem;flex-shrink:0">›</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+//  CANVAS TREE ENGINE
+// ══════════════════════════════════════
+const canvas=document.getElementById('tc');
+const ctx=canvas.getContext('2d');
+const NW=118,NH=98,HGAP=32,VGAP=64;
+let nodePos={};
+let nodeDrag={};
+let imgCache={};
+let camX=0,camY=0,sc=1;
+let camDrag=false,cdSX=0,cdSY=0,camSX=0,camSY=0;
+let ndDrag=false,ndId=null,ndSX=0,ndSY=0,ndOX=0,ndOY=0;
+let lastTap=0,longPressTimer=null;
+const COL={M:{bg:'#edf5fb',bd:'#8db8d0',av:'#a8c5da'},F:{bg:'#fff5f7',bd:'#d89ea8',av:'#e8b4bc'}};
+
+function resizeCanvas(){
+  const tb=document.getElementById('ttb'),pan=document.getElementById('treePanel');
+  canvas.width=pan.clientWidth||window.innerWidth;
+  canvas.height=(pan.clientHeight||window.innerHeight)-tb.offsetHeight;
+}
+
+function computeLayout(){
+  nodePos={};
+  const pl=Object.values(people);if(!pl.length)return;
+  const visited=new Set();let colCursor=0;
+  function primarySpouse(p){const sp=(p.spouses||[]).find(s=>people[s.id]);return sp?sp.id:null;}
+  function layoutFamily(id,row){
+    if(visited.has(id)||!people[id])return;
+    visited.add(id);
+    const p=people[id];const spId=primarySpouse(p);
+    const childSet=new Set([...(p.children||[])]);
+    if(spId&&people[spId])(people[spId].children||[]).forEach(c=>childSet.add(c));
+    const children=[...childSet].filter(c=>people[c]&&!visited.has(c));
+    if(!children.length){
+      nodePos[id]={x:colCursor*(NW+HGAP),y:row*(NH+VGAP)};colCursor++;
+      if(spId&&!visited.has(spId)&&people[spId]){visited.add(spId);nodePos[spId]={x:colCursor*(NW+HGAP),y:row*(NH+VGAP)};colCursor++;}
+      return;
+    }
+    const startCursor=colCursor;
+    children.forEach(cid=>layoutFamily(cid,row+1));
+    const childXs=children.map(c=>nodePos[c]).filter(Boolean).map(p2=>p2.x);
+    const midX=childXs.length?(Math.min(...childXs)+Math.max(...childXs))/2:startCursor*(NW+HGAP);
+    nodePos[id]={x:midX,y:row*(NH+VGAP)};
+    if(spId&&!visited.has(spId)&&people[spId]){
+      visited.add(spId);
+      nodePos[spId]={x:midX+(NW+HGAP),y:row*(NH+VGAP)};
+      if(colCursor<=Math.round(midX/(NW+HGAP))+1)colCursor=Math.round(midX/(NW+HGAP))+2;
+    }
+  }
+  const roots=pl.filter(p=>!p.father&&!p.mother);
+  if(!roots.length)roots.push(pl[0]);
+  roots.sort((a,b)=>{const ay=(a.birthDate||'').match(/\d{4}/)?.[0]||'9999',by2=(b.birthDate||'').match(/\d{4}/)?.[0]||'9999';return ay.localeCompare(by2);});
+  roots.forEach(r=>layoutFamily(r.id,0));
+  pl.forEach(p=>{if(!nodePos[p.id]){nodePos[p.id]={x:colCursor*(NW+HGAP),y:0};colCursor++;}});
+  // resolve overlaps
+  const rows={};
+  Object.entries(nodePos).forEach(([id,pos])=>{const ry=Math.round(pos.y/(NH+VGAP));if(!rows[ry])rows[ry]=[];rows[ry].push({id,pos});});
+  Object.values(rows).forEach(row=>{
+    row.sort((a,b)=>a.pos.x-b.pos.x);
+    for(let i=1;i<row.length;i++){const prev=row[i-1].pos,cur2=row[i].pos;if(cur2.x<prev.x+NW+HGAP-4){const shift=(prev.x+NW+HGAP-4)-cur2.x;for(let j=i;j<row.length;j++)row[j].pos.x+=shift;}}
+  });
+}
+
+function effPos(id){
+  const base=nodePos[id];if(!base)return null;
+  const off=nodeDrag[id]||{dx:0,dy:0};
+  return{x:base.x+off.dx,y:base.y+off.dy};
+}
+
+function preloadImgs(cb){
+  const tl=Object.values(people).filter(p=>p.photo&&!imgCache[p.id]);
+  if(!tl.length){cb();return;}
+  let n=0;tl.forEach(p=>{const img=new Image();img.src=p.photo;img.onload=img.onerror=()=>{imgCache[p.id]=img;n++;if(n===tl.length)cb();};});
+}
+
+function drawTree(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!Object.keys(nodePos).length){drawEmpty();return;}
+  ctx.save();ctx.translate(camX,camY);ctx.scale(sc,sc);
+  const drawnSpouses=new Set(),drawnChildren=new Set();
+  Object.values(people).forEach(p=>{
+    const pos=effPos(p.id);if(!pos)return;
+    // Spouse connections
+    (p.spouses||[]).forEach(sp=>{
+      if(!people[sp.id]||!effPos(sp.id))return;
+      const pairKey=[p.id,sp.id].sort().join('|');
+      if(drawnSpouses.has(pairKey))return;
+      const reciprocal=(people[sp.id].spouses||[]).some(s=>s.id===p.id)||people[sp.id].spouse===p.id;
+      if(!reciprocal)return;
+      drawnSpouses.add(pairKey);
+      const spos=effPos(sp.id);
+      const isDivorced=sp.status==='divorced';
+      const cx1=pos.x+NW/2,cy1=pos.y+NH/2,cx2=spos.x+NW/2,cy2=spos.y+NH/2;
+      const mx=(cx1+cx2)/2,my=Math.min(cy1,cy2);
+      if(isDivorced){
+        ctx.beginPath();ctx.setLineDash([6,4]);ctx.strokeStyle='#cc7070';ctx.lineWidth=1.5;
+        ctx.moveTo(cx1,cy1);ctx.lineTo(cx2,cy2);ctx.stroke();ctx.setLineDash([]);
+        ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💔',mx,my-4);
+      } else {
+        ctx.beginPath();ctx.setLineDash([5,3]);ctx.strokeStyle='#d89090';ctx.lineWidth=1.5;
+        ctx.moveTo(cx1,cy1);ctx.lineTo(cx2,cy2);ctx.stroke();ctx.setLineDash([]);
+        ctx.font='12px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('♥',mx,my-4);
+      }
+    });
+    // Children
+    if(drawnChildren.has(p.id))return;
+    drawnChildren.add(p.id);
+    const children=(p.children||[]).filter(c=>people[c]&&effPos(c));
+    if(!children.length)return;
+    const pcx=pos.x+NW/2,pby=pos.y+NH,barY=pby+VGAP*0.42;
+    ctx.setLineDash([]);ctx.strokeStyle='#c8bfb4';ctx.lineWidth=1.5;
+    if(children.length===1){
+      const cpos=effPos(children[0]);if(!cpos)return;
+      ctx.beginPath();ctx.moveTo(pcx,pby);ctx.bezierCurveTo(pcx,pby+VGAP*.45,cpos.x+NW/2,cpos.y-VGAP*.45,cpos.x+NW/2,cpos.y);ctx.stroke();
+    } else {
+      ctx.beginPath();ctx.moveTo(pcx,pby);ctx.lineTo(pcx,barY);ctx.stroke();
+      const cxs=children.map(c=>effPos(c)).filter(Boolean).map(cp=>cp.x+NW/2);
+      ctx.beginPath();ctx.moveTo(Math.min(...cxs),barY);ctx.lineTo(Math.max(...cxs),barY);ctx.stroke();
+      children.forEach(c=>{const cpos=effPos(c);if(!cpos)return;ctx.beginPath();ctx.moveTo(cpos.x+NW/2,barY);ctx.lineTo(cpos.x+NW/2,cpos.y);ctx.stroke();});
+    }
+  });
+  Object.values(people).forEach(p=>{const pos=effPos(p.id);if(pos)drawNode(p,pos.x,pos.y);});
+  ctx.restore();
+}
+
+function drawEmpty(){
+  ctx.fillStyle='#c8bfb4';ctx.font='48px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌳',canvas.width/2,canvas.height/2-24);
+  ctx.font='600 15px Nunito,sans-serif';ctx.fillStyle='#b0967e';ctx.fillText('Kişi ekleyin veya GED yükleyin',canvas.width/2,canvas.height/2+28);
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function drawNode(p,x,y){
+  const c=COL[p.gender]||COL.M;
+  const isd=ndDrag&&ndId===p.id;
+  ctx.shadowColor=isd?'rgba(80,50,30,.35)':'rgba(80,50,30,.15)';ctx.shadowBlur=isd?16:7;ctx.shadowOffsetY=isd?6:3;
+  roundRect(x,y,NW,NH,12);ctx.fillStyle=c.bg;ctx.fill();
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+  ctx.strokeStyle=isd?'#c8855a':c.bd;ctx.lineWidth=isd?2.5:2;ctx.stroke();
+  const avR=21,avX=x+NW/2,avY=y+avR+9;
+  ctx.beginPath();ctx.arc(avX,avY,avR,0,Math.PI*2);ctx.fillStyle=c.av;ctx.fill();ctx.strokeStyle=c.bd;ctx.lineWidth=1.5;ctx.stroke();
+  if(imgCache[p.id]&&imgCache[p.id].complete&&imgCache[p.id].naturalWidth){
+    ctx.save();ctx.beginPath();ctx.arc(avX,avY,avR,0,Math.PI*2);ctx.clip();ctx.drawImage(imgCache[p.id],avX-avR,avY-avR,avR*2,avR*2);ctx.restore();
+  } else {
+    ctx.font=`${Math.round(avR*1.25)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.gender==='M'?'👨':'👩',avX,avY);
+  }
+  if((p.gallery||[]).length){ctx.beginPath();ctx.arc(avX+avR-4,avY-avR+4,6,0,Math.PI*2);ctx.fillStyle='#c9a87c';ctx.fill();ctx.font='bold 7px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.gallery.length,avX+avR-4,avY-avR+4);}
+  if((p.spouses||[]).some(s=>s.status==='divorced')){ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💔',avX-avR+5,avY-avR+5);}
+  const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';
+  ctx.fillStyle='#3d2f23';ctx.font='bold 10px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  let dn=nm;const mw=NW-10;while(ctx.measureText(dn).width>mw&&dn.length>1)dn=dn.slice(0,-1);if(dn!==nm)dn+='…';
+  ctx.fillText(dn,x+NW/2,avY+avR+4);
+  if(p.maidenName&&p.gender==='F'){ctx.font='italic 8px Nunito,sans-serif';ctx.fillStyle='#b0967e';let mn='d.'+p.maidenName;while(ctx.measureText(mn).width>mw&&mn.length>3)mn=mn.slice(0,-1);ctx.fillText(mn,x+NW/2,avY+avR+16);}
+  const by=(p.birthDate||'').match(/\d{4}/)?.[0],dy=(p.deathDate||'').match(/\d{4}/)?.[0];
+  const dateY=avY+avR+(p.maidenName&&p.gender==='F'?26:16);
+  ctx.font='8.5px Nunito,sans-serif';ctx.fillStyle='#b0967e';if(by)ctx.fillText('*'+by,x+NW/2,dateY);
+  if(dy){ctx.fillStyle='#aaa';ctx.fillText('†'+dy,x+NW/2,dateY+(by?10:0));}
+  const chCount=(p.children||[]).filter(c=>people[c]).length;
+  if(chCount>0){ctx.beginPath();ctx.arc(x+NW-7,y+NH-7,7,0,Math.PI*2);ctx.fillStyle='#8faa8a';ctx.fill();ctx.font='bold 8px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(chCount,x+NW-7,y+NH-7);}
+}
+
+// CONTROLS
+function zoomBy(d){const os=sc;sc=Math.max(.2,Math.min(3,sc+d));const cx=canvas.width/2,cy=canvas.height/2;camX=cx-(cx-camX)*(sc/os);camY=cy-(cy-camY)*(sc/os);drawTree();}
+function fitAll(){
+  const vals=Object.keys(nodePos).map(id=>effPos(id)).filter(Boolean);if(!vals.length)return;
+  const xs=vals.map(p=>p.x),ys=vals.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs)+NW,minY=Math.min(...ys),maxY=Math.max(...ys)+NH;
+  const tw=maxX-minX,th=maxY-minY;if(!tw||!th)return;
+  sc=Math.min(.95*(canvas.width/tw),.85*(canvas.height/th),2.5);
+  camX=(canvas.width-tw*sc)/2-minX*sc;camY=30-minY*sc;drawTree();
+}
+function resetView(){camX=30;camY=30;sc=1;drawTree();}
+function resetLayout(){nodeDrag={};save();buildTree();toast('↺ Düzen sıfırlandı');}
+function saveLayout(){
+  try{localStorage.setItem('sa4nd',JSON.stringify(nodeDrag));}catch(e){}
+  if(supaUser){
+    supa.from('node_positions').upsert({user_id:supaUser.id,positions:nodeDrag},{onConflict:'user_id'})
+      .then(()=>toast('💾 Ağaç konumları kaydedildi!')).catch(()=>toast('💾 Ağaç konumları kaydedildi!'));
+  } else {toast('💾 Ağaç konumları kaydedildi!');}
+}
+async function loadLayout(){
+  if(supaUser){
+    try{const {data}=await supa.from('node_positions').select('positions').eq('user_id',supaUser.id).single();if(data){nodeDrag=data.positions||{};return;}}catch(e){}
+  }
+  try{const d=localStorage.getItem('sa4nd');if(d)nodeDrag=JSON.parse(d);}catch(e){}
+}
+function focusPerson(id){if(!id)return;const pos=effPos(id);if(!pos)return;sc=1.3;camX=canvas.width/2-(pos.x+NW/2)*sc;camY=canvas.height/3-(pos.y+NH/2)*sc;drawTree();}
+
+function buildTree(){
+  computeLayout();
+  preloadImgs(()=>drawTree());
+  updateFocSel();
+  setTimeout(drawTree,400);
+}
+function updateFocSel(){
+  const sel=document.getElementById('focSel');const cur=sel.value;
+  sel.innerHTML='<option value="">— Kişiye odaklan —</option>'+
+    Object.values(people).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName,'tr'))
+      .map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
+}
+function hitTest(cx,cy){
+  const rect=canvas.getBoundingClientRect();
+  const wx=(cx-rect.left-camX)/sc,wy=(cy-rect.top-camY)/sc;
+  return Object.values(people).find(p=>{const pos=effPos(p.id);return pos&&wx>=pos.x&&wx<=pos.x+NW&&wy>=pos.y&&wy<=pos.y+NH;});
+}
+
+// Mouse
+canvas.addEventListener('mousedown',e=>{
+  const p=hitTest(e.clientX,e.clientY);
+  if(p){ndId=p.id;ndSX=e.clientX;ndSY=e.clientY;ndOX=(nodeDrag[p.id]||{dx:0}).dx;ndOY=(nodeDrag[p.id]||{dy:0}).dy;longPressTimer=setTimeout(()=>{ndDrag=true;canvas.classList.add('dg');drawTree();},350);}
+  else{camDrag=true;cdSX=e.clientX;cdSY=e.clientY;camSX=camX;camSY=camY;canvas.classList.add('dg');}
+});
+canvas.addEventListener('mousemove',e=>{
+  if(ndDrag&&ndId){const dx=(e.clientX-ndSX)/sc,dy=(e.clientY-ndSY)/sc;nodeDrag[ndId]={dx:ndOX+dx,dy:ndOY+dy};drawTree();}
+  else if(camDrag){camX=camSX+(e.clientX-cdSX);camY=camSY+(e.clientY-cdSY);drawTree();}
+});
+canvas.addEventListener('mouseup',()=>{clearTimeout(longPressTimer);ndDrag=false;ndId=null;camDrag=false;canvas.classList.remove('dg');});
+canvas.addEventListener('mouseleave',()=>{clearTimeout(longPressTimer);ndDrag=false;ndId=null;camDrag=false;canvas.classList.remove('dg');});
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoomBy(e.deltaY<0?.12:-.12);},{passive:false});
+canvas.addEventListener('dblclick',e=>{const p=hitTest(e.clientX,e.clientY);if(p)openDetail(p.id);});
+
+// Touch
+let ts=null,pinch0=null,tNodeId=null,tNodeSX=0,tNodeSY=0,tNodeOX=0,tNodeOY=0,tNodeDrag=false;
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();clearTimeout(longPressTimer);
+  if(e.touches.length===1){
+    const tx=e.touches[0].clientX,ty=e.touches[0].clientY;
+    const p=hitTest(tx,ty);const now=Date.now();
+    if(now-lastTap<320){const ph=hitTest(tx,ty);if(ph)openDetail(ph.id);lastTap=0;return;}
+    lastTap=now;
+    if(p){tNodeId=p.id;tNodeSX=tx;tNodeSY=ty;tNodeOX=(nodeDrag[p.id]||{dx:0}).dx;tNodeOY=(nodeDrag[p.id]||{dy:0}).dy;longPressTimer=setTimeout(()=>{tNodeDrag=true;drawTree();},400);}
+    else ts={x:tx,y:ty,camX,camY};
+  } else if(e.touches.length===2){
+    clearTimeout(longPressTimer);tNodeDrag=false;tNodeId=null;ts=null;
+    pinch0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===1){
+    const tx=e.touches[0].clientX,ty=e.touches[0].clientY;
+    if(tNodeDrag&&tNodeId){const dx=(tx-tNodeSX)/sc,dy=(ty-tNodeSY)/sc;nodeDrag[tNodeId]={dx:tNodeOX+dx,dy:tNodeOY+dy};drawTree();}
+    else if(ts){camX=ts.camX+(tx-ts.x);camY=ts.camY+(ty-ts.y);drawTree();}
+  } else if(e.touches.length===2&&pinch0){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoomBy((d-pinch0)*.003);pinch0=d;
+  }
+},{passive:false});
+canvas.addEventListener('touchend',e=>{clearTimeout(longPressTimer);if(e.touches.length===0){tNodeDrag=false;tNodeId=null;ts=null;pinch0=null;}},{passive:false});
+function schedHide(){setTimeout(()=>{const h=document.getElementById('th');if(h){h.style.transition='opacity 1.2s';h.style.opacity='0';}},5000);}
+
+// ══════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════
+function renderStats(){
+  const pl=Object.values(people);
+  if(!pl.length){document.getElementById('stCont').innerHTML=`<div class="es"><div class="ei">📊</div><h3>Veri yok</h3><p>Önce kişi ekleyin.</p></div>`;return;}
+  const total=pl.length,males=pl.filter(p=>p.gender==='M').length,females=pl.filter(p=>p.gender==='F').length;
+  const living=pl.filter(p=>!p.deathDate).length;
+  const withPhoto=pl.filter(p=>p.photo).length,totPh=pl.reduce((s,p)=>s+(p.gallery||[]).length,0);
+  const aged=pl.map(p=>{const by=(p.birthDate||'').match(/\d{4}/)?.[0];const dy=(p.deathDate||'').match(/\d{4}/)?.[0];if(!by)return null;return{id:p.id,name:[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz',age:dy?+dy-+by:new Date().getFullYear()-+by,died:!!dy,by,dy};}).filter(Boolean);
+  const avgAge=aged.length?Math.round(aged.reduce((s,a)=>s+a.age,0)/aged.length):null;
+  const da=[...aged.filter(a=>a.died)];
+  const oldest=da.length?[...da].sort((a,b)=>b.age-a.age)[0]:null;
+  const youngest=da.length?[...da].sort((a,b)=>a.age-b.age)[0]:null;
+  const fnFreq={};pl.forEach(p=>{if(p.firstName){const n=p.firstName.split(' ')[0];fnFreq[n]=(fnFreq[n]||0)+1;}});
+  const topNames=Object.entries(fnFreq).sort((a,b)=>b[1]-a[1]).slice(0,8),maxN=topNames[0]?topNames[0][1]:1;
+  const dec={};pl.forEach(p=>{const y=(p.birthDate||'').match(/\d{4}/)?.[0];if(y){const d=Math.floor(+y/10)*10;dec[d]=(dec[d]||0)+1;}});
+  const sd=Object.entries(dec).sort((a,b)=>a[0]-b[0]),maxD=Math.max(...Object.values(dec),1);
+  const locs={};pl.forEach(p=>{if(p.birthPlace){const l=p.birthPlace.split(',')[0].trim();locs[l]=(locs[l]||0)+1;}});
+  const topL=Object.entries(locs).sort((a,b)=>b[1]-a[1]).slice(0,8),maxL=topL[0]?topL[0][1]:1;
+  const surns={};pl.forEach(p=>{if(p.lastName)surns[p.lastName]=(surns[p.lastName]||0)+1;});
+  const topS=Object.entries(surns).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const BC=['#c8855a','#8faa8a','#7ba3b8','#c9a87c','#b89ab8','#7a9a9a','#d4a878','#8fa8c8'];
+  document.getElementById('stCont').innerHTML=`
+    <div class="sg">
+      <div class="sc"><div class="sn">${total}</div><div class="sl">Toplam Kişi</div></div>
+      <div class="sc"><div class="sn">${living}</div><div class="sl">Hayatta</div></div>
+      <div class="sc"><div class="sn">${males}</div><div class="sl">Erkek</div></div>
+      <div class="sc"><div class="sn">${females}</div><div class="sl">Kadın</div></div>
+      <div class="sc"><div class="sn">${withPhoto}</div><div class="sl">Fotoğraflı</div></div>
+      <div class="sc"><div class="sn">${totPh}</div><div class="sl">Toplam Fotoğraf</div></div>
+      ${avgAge!==null?`<div class="sc wide"><div class="sn">${avgAge}</div><div class="sl">Ortalama Yaşam (yıl)</div></div>`:''}
+    </div>
+    ${oldest||youngest?`<div class="cbw"><div class="cbt">🏅 Yaşam Rekorları</div>
+      ${oldest?`<div class="life-card" onclick="openDetail('${oldest.id}')"><div class="life-name">🥇 En Uzun: ${oldest.name}</div><div class="life-detail">*${oldest.by} — †${oldest.dy} · ${oldest.age} yıl</div></div>`:''}
+      ${youngest&&youngest.id!==oldest?.id?`<div class="life-card" onclick="openDetail('${youngest.id}')"><div class="life-name">📉 En Kısa: ${youngest.name}</div><div class="life-detail">*${youngest.by} — †${youngest.dy} · ${youngest.age} yıl</div></div>`:''}
+    </div>`:''}
+    ${topNames.length?`<div class="cbw"><div class="cbt">👤 En Çok Kullanılan İsimler</div>${topNames.map(([n,c],i)=>`<div class="cbi"><div class="cbl">${n}</div><div class="cbtr"><div class="cbf" style="width:${Math.round(c/maxN*100)}%;background:${BC[i%BC.length]}"></div></div><div class="cbc">${c}</div></div>`).join('')}</div>`:''}
+    ${sd.length?`<div class="cbw"><div class="cbt">📅 On Yıllara Göre Doğumlar</div>${sd.map(([d,c],i)=>`<div class="cbi"><div class="cbl">${d}'ler</div><div class="cbtr"><div class="cbf" style="width:${Math.round(c/maxD*100)}%;background:${BC[i%BC.length]}"></div></div><div class="cbc">${c}</div></div>`).join('')}</div>`:''}
+    ${topL.length?`<div class="cbw"><div class="cbt">📍 En Çok Doğum Yeri</div>${topL.map(([l,c],i)=>`<div class="cbi"><div class="cbl">${l}</div><div class="cbtr"><div class="cbf" style="width:${Math.round(c/maxL*100)}%;background:${BC[i%BC.length]}"></div></div><div class="cbc">${c}</div></div>`).join('')}</div>`:''}
+    ${topS.length?`<div class="cbw"><div class="cbt">👨‍👩‍👧 Soyadlar</div><div style="display:flex;flex-wrap:wrap;gap:5px">${topS.map(([s,c],i)=>`<span style="background:${BC[i%BC.length]}22;color:${BC[i%BC.length]};border:1.5px solid ${BC[i%BC.length]}55;border-radius:11px;padding:3px 10px;font-size:.76rem;font-weight:700">${s} (${c})</span>`).join('')}</div></div>`:''}
+    <div style="background:var(--surface);border-radius:var(--r);padding:12px;border:1.5px solid var(--border);margin-top:4px">
+      <div class="sd" style="margin-top:0">Cinsiyet Dağılımı</div>
+      <div style="display:flex;height:18px;border-radius:6px;overflow:hidden;gap:2px"><div style="flex:${males||1};background:var(--male)"></div><div style="flex:${females||1};background:var(--female)"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.73rem;color:var(--text2)"><span>👨 ${total?Math.round(males/total*100):0}%</span><span>👩 ${total?Math.round(females/total*100):0}%</span></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+//  IMPORT / EXPORT
+// ══════════════════════════════════════
+function handleGED(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>parseGED(e.target.result);r.readAsText(f,'UTF-8');inp.value='';}
+function expJSON(){dl('soy-agaci.json',JSON.stringify({people,fams,nextId},null,2),'application/json');}
+function expGED(){
+  let g='0 HEAD\n1 CHAR UTF-8\n1 SOUR SoyAgaci\n';
+  Object.values(people).forEach(p=>{
+    g+=`0 @${p.id}@ INDI\n1 NAME ${p.firstName} /${p.lastName||''}/\n`;
+    if(p.gender)g+=`1 SEX ${p.gender}\n`;
+    if(p.birthDate||p.birthPlace){g+='1 BIRT\n';if(p.birthDate)g+=`2 DATE ${p.birthDate}\n`;if(p.birthPlace)g+=`2 PLAC ${p.birthPlace}\n`;}
+    if(p.deathDate||p.deathPlace){g+='1 DEAT\n';if(p.deathDate)g+=`2 DATE ${p.deathDate}\n`;if(p.deathPlace)g+=`2 PLAC ${p.deathPlace}\n`;}
+    if(p.occupation)g+=`1 OCCU ${p.occupation}\n`;
+    if(p.notes)g+=`1 NOTE ${p.notes}\n`;
+  });
+  g+='0 TRLR\n';dl('soy-agaci.ged',g,'text/plain');
+}
+function dl(fn,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=fn;a.click();}
+function clearAll(){if(!confirm('Tüm veriler silinecek. Emin misiniz?'))return;people={};fams={};nextId=1;imgCache={};nodeDrag={};save();renderAll();buildTree();toast('🗑️ Tüm veriler silindi');}
+
+// ══════════════════════════════════════
+//  DEMO
+// ══════════════════════════════════════
+function loadDemo(){
+  people={};fams={};nextId=1;imgCache={};nodeDrag={};
+  function add(fn,ln,g,bd,bp,dd,dp,oc,mn){const id=newId();people[id]={id,firstName:fn,lastName:ln,gender:g,birthDate:bd||'',birthPlace:bp||'',deathDate:dd||'',deathPlace:dp||'',occupation:oc||'',maidenName:mn||'',maritalStatus:'married',notes:'',photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};return id;}
+  function marry(a,b,st='married'){people[a].spouses=[{id:b,status:st}];people[a].spouse=b;people[b].spouses=[{id:a,status:st}];people[b].spouse=a;}
+  function ch(fa,mo,c){people[c].father=fa;people[c].mother=mo;if(fa&&!people[fa].children.includes(c))people[fa].children.push(c);if(mo&&!people[mo].children.includes(c))people[mo].children.push(c);}
+  const d1=add('Ahmet','Yılmaz','M','1920','Kayseri','1985','Kayseri','Çiftçi');
+  const d2=add('Hatice','Yılmaz','F','1925','Kayseri','1992','İstanbul','Ev Hanımı','Öztürk');
+  marry(d1,d2);
+  const b=add('Mehmet','Yılmaz','M','1950','Kayseri','','','Öğretmen');
+  const a=add('Fatma','Yılmaz','F','1955','Ankara','','','Hemşire','Kaya');
+  marry(b,a);ch(d1,d2,b);
+  const am=add('Ali','Yılmaz','M','1953','Kayseri','2010','Kayseri','Mühendis');ch(d1,d2,am);
+  const hl=add('Ayşe','Demir','F','1958','Kayseri','','','Doktor','Yılmaz');ch(d1,d2,hl);
+  const k=add('Kemal','Yılmaz','M','1978','İstanbul','','','Yazılımcı');ch(b,a,k);
+  const z=add('Zeynep','Kaya','F','1975','İstanbul','','','Avukat','Yılmaz');ch(b,a,z);
+  const s=add('Selin','Yılmaz','F','1980','Ankara','','','Mimar','Arslan');
+  marry(k,s);
+  const c1=add('Can','Yılmaz','M','2005','İstanbul','','','Öğrenci');
+  const c2=add('Ece','Yılmaz','F','2008','İstanbul','','','Öğrenci');
+  ch(k,s,c1);ch(k,s,c2);
+  const e1=add('Berk','Kaya','M','1973','İzmir','','','Doktor');
+  marry(z,e1,'divorced');
+  const yg=add('Mira','Kaya','F','2003','İstanbul','','','Öğrenci');ch(e1,z,yg);
+  const e2=add('Onur','Demir','M','1970','Ankara','','','İşletmeci');
+  people[z].spouses.push({id:e2,status:'married'});
+  people[e2].spouses=[{id:z,status:'married'}];people[e2].spouse=z;
+  save();toast('✅ Demo yüklendi! (Zeynep boşanmış 💔)');renderAll();buildTree();switchTab('list');
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+function cModal(id){document.getElementById(id).style.display='none';}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2700);}
+function renderAll(){renderList();updateFocSel();if(document.getElementById('statsPanel').classList.contains('active'))renderStats();if(document.getElementById('settingsPanel').classList.contains('active'))renderMissing();}
+
+// Import zone drag-drop
+const iz=document.getElementById('impZone');
+iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('do');});
+iz.addEventListener('dragleave',()=>iz.classList.remove('do'));
+iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('do');const f=e.dataTransfer.files[0];if(f){const r=new FileReader();r.onload=ev=>parseGED(ev.target.result);r.readAsText(f,'UTF-8');}});
+
+document.getElementById('addBtn').addEventListener('click',()=>openForm());
+window.addEventListener('resize',()=>{resizeCanvas();drawTree();});
+
+// ══════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════
+function updateAuthUI(){
+  const el=document.getElementById('userInfo');
+  if(!el)return;
+  if(supaUser){
+    const name=supaUser.user_metadata?.name||supaUser.email||'';
+    const avatar=supaUser.user_metadata?.avatar_url||'';
+    el.innerHTML=(avatar?`<img src="${avatar}" alt="">`:``)
+      +`<span>${name}</span><button class="btn bg bs" onclick="signOut()" style="padding:4px 9px;font-size:.7rem">Çıkış</button>`;
+    el.style.display='flex';
+  } else {el.innerHTML='';el.style.display='none';}
+}
+
+async function signInGoogle(){
+  await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+}
+async function signOut(){
+  await supa.auth.signOut();
+  people={};fams={};nextId=1;nodeDrag={};
+  renderAll();buildTree();
+}
+
+async function initApp(){
+  const {data:{session}}=await supa.auth.getSession();
+  supaUser=session?.user||null;
+  document.getElementById('authOverlay').style.display=supaUser?'none':'flex';
+  updateAuthUI();
+
+  supa.auth.onAuthStateChange(async(_ev,sess)=>{
+    const prev=supaUser;
+    supaUser=sess?.user||null;
+    updateAuthUI();
+    document.getElementById('authOverlay').style.display=supaUser?'none':'flex';
+    if(supaUser&&!prev){
+      people={};fams={};nextId=1;nodeDrag={};
+      await load();await loadLayout();
+      renderAll();buildTree();
+      setTimeout(()=>{if(Object.keys(nodePos).length)fitAll();},200);
+    }
+  });
+
+  if(supaUser){
+    await load();await loadLayout();
+  }
+  resizeCanvas();
+  renderAll();
+  buildTree();
+  setTimeout(()=>{if(Object.keys(nodePos).length)fitAll();},200);
+  schedHide();
+}
+
+initApp();
+</script>
+</body>
+</html>
