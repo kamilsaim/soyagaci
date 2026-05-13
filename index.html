@@ -76,6 +76,12 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .md{background:var(--surface);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:18px 15px 30px;animation:su .22s}
 @keyframes su{from{transform:translateY(100%)}}
 .mh{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px}
+@media(min-width:641px){.mo{align-items:center;justify-content:center}.md{width:min(560px,92vw);border-radius:var(--r);max-height:85vh;animation:mdIn .2s}.mh{display:none}}
+@keyframes mdIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.ch-checks{max-height:130px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;background:var(--bg)}
+.ch-checks label{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.85rem;padding:3px 2px;border-radius:4px}
+.ch-checks label:hover{background:var(--hover,rgba(0,0,0,.04))}
+.ch-checks input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;cursor:pointer}
 .mt{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--text);margin-bottom:14px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .fgp{display:flex;flex-direction:column;gap:4px}
@@ -476,7 +482,7 @@ textarea{resize:vertical;min-height:65px}
     <!-- ÇOCUK -->
     <div class="fgp full">
       <label>Çocuk Ekle</label>
-      <select id="f_ch" multiple style="min-height:80px"><option value="" disabled>Ctrl/Cmd ile birden fazla seçin</option></select>
+      <div id="f_ch" class="ch-checks"><span style="color:var(--text3);font-size:.82rem;padding:2px">Kişi kaydedildiğinde liste oluşur</span></div>
       <div class="inline-add" id="ia_ch" style="display:none">
         <div class="inline-add-title">➕ Yeni çocuk ekle &amp; bağla</div>
         <div class="inline-add-fields">
@@ -828,8 +834,7 @@ function openForm(id){
     document.getElementById('f_sp').value=curSp?curSp.id:'';
     document.getElementById('f_ms2').value=curSp?curSp.status:'married';
     // Pre-select children
-    const chSel=document.getElementById('f_ch');
-    Array.from(chSel.options).forEach(opt=>{opt.selected=(p.children||[]).includes(opt.value);});
+    Array.from(document.querySelectorAll('#f_ch input[type=checkbox]')).forEach(cb=>{cb.checked=(p.children||[]).includes(cb.value);});
     gal=[...(p.gallery||[])];mainPhoto=p.photo||null;
     if(mainPhoto&&!gal.includes(mainPhoto))gal.unshift(mainPhoto);
     mainPhoto?showMain(mainPhoto):hideMain();
@@ -868,8 +873,7 @@ function savePerson(){
   const sp=document.getElementById('f_sp').value;
   const ms=document.getElementById('f_ms2').value;
   // Collect selected children
-  const chSel=document.getElementById('f_ch');
-  const newChildren=Array.from(chSel.selectedOptions).map(o=>o.value).filter(Boolean);
+  const newChildren=Array.from(document.querySelectorAll('#f_ch input[type=checkbox]:checked')).map(cb=>cb.value).filter(Boolean);
   const g=document.getElementById('f_g').value;
   people[id]={id,firstName:fn,lastName:ln,gender:g,
     birthDate:document.getElementById('f_bd').value.trim(),
