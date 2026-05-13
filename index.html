@@ -819,7 +819,7 @@ function openForm(id){
   const opts='<option value="">— Seçin —</option>'+others.map(x=>`<option value="${x.id}">${[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
   ['f_mo','f_fa','f_sp'].forEach(s=>document.getElementById(s).innerHTML=opts);
   // Children multi-select
-  document.getElementById('f_ch').innerHTML=others.map(x=>`<option value="${x.id}">${[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz'}</option>`).join('');
+  renderChTags();
 
   const gender=p?p.gender:'M';
   // Show/hide maiden name based on gender
