@@ -47,7 +47,7 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .fc::-webkit-scrollbar{display:none}
 .chip{padding:4px 11px;border-radius:18px;font-size:.74rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);white-space:nowrap;transition:all .18s}
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.pl{display:flex;flex-direction:column;gap:9px}
+.pl{display:flex;flex-direction:column;gap:7px}
 .pc{background:var(--surface);border-radius:var(--r);padding:11px 13px;border:1.5px solid var(--border);display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .18s}
 .pc:hover{border-color:var(--accent);transform:translateX(2px);box-shadow:0 2px 12px var(--shadow)}
 .pc.sel{border-color:var(--accent);background:#fff8f3}
@@ -73,7 +73,7 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(60,40,25,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;animation:fi .18s}
 @keyframes fi{from{opacity:0}}
-.md{background:var(--surface);border-radius:var(--r);width:min(560px,100%);max-height:88vh;overflow-y:auto;padding:20px 18px 28px;animation:mdIn .22s}
+.md{background:var(--surface);border-radius:var(--r);width:min(560px,100%);max-height:88vh;overflow-y:auto;padding:14px 14px 20px;animation:mdIn .22s}
 @keyframes mdIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .mh{display:none}
 .ch-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:34px;padding:5px 6px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);align-items:center}
@@ -81,8 +81,8 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .ch-tag-x{background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;padding:0 0 0 3px;line-height:1}
 .ch-tag-x:hover{color:#c0392b}
 .mt{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--text);margin-bottom:14px}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.fgp{display:flex;flex-direction:column;gap:4px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.fgp{display:flex;flex-direction:column;gap:3px}
 .fgp.full{grid-column:1/-1}
 label{font-size:.73rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
 input,select,textarea{padding:9px 11px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-family:'Nunito',sans-serif;font-size:.86rem;color:var(--text);outline:none;transition:border .18s;width:100%}
@@ -97,7 +97,7 @@ textarea{resize:vertical;min-height:65px}
 .pph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;gap:6px;color:var(--text3)}
 .pph .ic{font-size:2.5rem}
 .pcb{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:20px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer;z-index:3;font-family:'Nunito',sans-serif}
-.sd{margin:12px 0 8px;font-size:.73rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:7px}
+.sd{margin:8px 0 5px;font-size:.73rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:7px}
 .sd::after{content:'';flex:1;height:1px;background:var(--border)}
 .gs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
 .gs::-webkit-scrollbar{display:none}
@@ -416,12 +416,11 @@ textarea{resize:vertical;min-height:65px}
     <div class="fgp"><label>Ölüm Yeri</label><input id="f_dp" placeholder="Şehir, Ülke" oninput="autoCap(this)"></div>
     <div class="fgp full"><label>Meslek</label><input id="f_oc" placeholder="Meslek" oninput="autoCap(this)"></div>
     <div class="fgp full" id="maidenRow" style="display:none"><label>Kızlık Soyadı</label><input id="f_ms" placeholder="Evlenmeden önceki soyad" oninput="autoCap(this)"></div>
-    <div class="fgp full"><label>Notlar</label><textarea id="f_no" placeholder="Ek bilgiler..."></textarea></div>
   </div>
   <div class="sd">Aile Bağlantıları</div>
   <div class="fg">
     <!-- ANNE -->
-    <div class="fgp full">
+    <div class="fgp">
       <label>Anne</label>
       <select id="f_mo"><option value="">— Seçin —</option></select>
       <div class="inline-add" id="ia_mo" style="display:none">
@@ -439,7 +438,7 @@ textarea{resize:vertical;min-height:65px}
       <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('mo',true)">➕ Yeni Anne Ekle</button>
     </div>
     <!-- BABA -->
-    <div class="fgp full">
+    <div class="fgp">
       <label>Baba</label>
       <select id="f_fa"><option value="">— Seçin —</option></select>
       <div class="inline-add" id="ia_fa" style="display:none">
@@ -505,6 +504,10 @@ textarea{resize:vertical;min-height:65px}
       </div>
       <button class="btn bg bs" style="margin-top:5px;width:100%" onclick="toggleIA('ch',true)">➕ Yeni Çocuk Ekle</button>
     </div>
+  </div>
+  <div class="sd">Notlar</div>
+  <div class="fg">
+    <div class="fgp full"><textarea id="f_no" placeholder="Ek bilgiler, özel notlar..." style="min-height:65px"></textarea></div>
   </div>
   <div class="ma">
     <button class="btn bg" onclick="cModal('formModal')">İptal</button>
