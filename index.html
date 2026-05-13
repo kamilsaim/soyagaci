@@ -76,10 +76,10 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .md{background:var(--surface);border-radius:var(--r);width:min(560px,100%);max-height:88vh;overflow-y:auto;padding:20px 18px 28px;animation:mdIn .22s}
 @keyframes mdIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .mh{display:none}
-.ch-checks{max-height:130px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;background:var(--bg)}
-.ch-checks label{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.85rem;padding:3px 2px;border-radius:4px}
-.ch-checks label:hover{background:var(--hover,rgba(0,0,0,.04))}
-.ch-checks input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.ch-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:34px;padding:5px 6px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);align-items:center}
+.ch-tag{display:inline-flex;align-items:center;gap:3px;background:rgba(184,147,63,.12);border:1px solid var(--accent);border-radius:12px;padding:3px 7px 3px 10px;font-size:.8rem;color:var(--text);white-space:nowrap}
+.ch-tag-x{background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;padding:0 0 0 3px;line-height:1}
+.ch-tag-x:hover{color:#c0392b}
 .mt{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--text);margin-bottom:14px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .fgp{display:flex;flex-direction:column;gap:4px}
@@ -313,6 +313,12 @@ textarea{resize:vertical;min-height:65px}
 <!-- SETTINGS -->
 <div class="panel" id="settingsPanel">
   <div class="settings-section">
+    <h4>📅 Tarih Formatı Dönüştürücü</h4>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:12px">MyHeritage / Ancestry kaynaklı <strong style="color:var(--text)">30 JUL 2003</strong> formatındaki doğum ve ölüm tarihlerini <strong style="color:var(--text)">30/07/2003</strong> formatına otomatik çevirir.</p>
+    <div id="dateConvResult" style="font-size:.8rem;color:var(--text2);margin-bottom:10px;display:none"></div>
+    <button class="btn bp" onclick="fixDates()">📅 Tarihleri Dönüştür</button>
+  </div>
+  <div class="settings-section">
     <h4>🔍 Eksik Veri Raporu</h4>
     <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px">Aşağıdaki kişilerde bazı bilgiler eksik. Tıklayarak düzenleyebilirsiniz.</p>
     <div class="missing-filters">
@@ -479,10 +485,14 @@ textarea{resize:vertical;min-height:65px}
     </div>
     <!-- ÇOCUK -->
     <div class="fgp full">
-      <label>Çocuk Ekle</label>
-      <div id="f_ch" class="ch-checks"><span style="color:var(--text3);font-size:.82rem;padding:2px">Kişi kaydedildiğinde liste oluşur</span></div>
+      <label>Çocuklar</label>
+      <div id="f_ch_tags" class="ch-tags"></div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+        <select id="f_ch_sel" style="flex:1"><option value="">— Mevcut kişiyi seç —</option></select>
+        <button class="btn bp bs" onclick="addChFromSel()">+ Ekle</button>
+      </div>
       <div class="inline-add" id="ia_ch" style="display:none">
-        <div class="inline-add-title">➕ Yeni çocuk ekle &amp; bağla</div>
+        <div class="inline-add-title">➕ Yeni çocuk oluştur &amp; bağla</div>
         <div class="inline-add-fields">
           <input id="ia_ch_fn" placeholder="Ad" oninput="autoCap(this)">
           <input id="ia_ch_ln" placeholder="Soyad" oninput="autoCap(this)">
@@ -532,7 +542,7 @@ let supaUser=null,saveTimer=null;
 const APP_VER='4.0';
 let people={},fams={},nextId=1;
 let filt='all',bulkMode=false,selIds=new Set();
-let editId=null,mainPhoto=null,gal=[];
+let editId=null,mainPhoto=null,gal=[],formChildren=[];
 let missFilt='all';
 
 function newId(){return 'P'+(nextId++);}
@@ -802,7 +812,7 @@ function inlineAdd(role){
 //  PERSON FORM
 // ══════════════════════════════════════
 function openForm(id){
-  editId=id||null;mainPhoto=null;gal=[];
+  editId=id||null;mainPhoto=null;gal=[];formChildren=[];
   document.getElementById('formTitle').textContent=id?'Kişiyi Düzenle':'Yeni Kişi';
   const p=id?people[id]:null;
   const others=Object.values(people).filter(x=>x.id!==id);
@@ -832,7 +842,7 @@ function openForm(id){
     document.getElementById('f_sp').value=curSp?curSp.id:'';
     document.getElementById('f_ms2').value=curSp?curSp.status:'married';
     // Pre-select children
-    Array.from(document.querySelectorAll('#f_ch input[type=checkbox]')).forEach(cb=>{cb.checked=(p.children||[]).includes(cb.value);});
+    formChildren=[...(p.children||[])].filter(cid=>people[cid]);renderChTags();
     gal=[...(p.gallery||[])];mainPhoto=p.photo||null;
     if(mainPhoto&&!gal.includes(mainPhoto))gal.unshift(mainPhoto);
     mainPhoto?showMain(mainPhoto):hideMain();
@@ -871,7 +881,7 @@ function savePerson(){
   const sp=document.getElementById('f_sp').value;
   const ms=document.getElementById('f_ms2').value;
   // Collect selected children
-  const newChildren=Array.from(document.querySelectorAll('#f_ch input[type=checkbox]:checked')).map(cb=>cb.value).filter(Boolean);
+  const newChildren=[...formChildren];
   const g=document.getElementById('f_g').value;
   people[id]={id,firstName:fn,lastName:ln,gender:g,
     birthDate:document.getElementById('f_bd').value.trim(),
@@ -1388,6 +1398,48 @@ function expGED(){
   out+='0 TRLR\n';dl('soy-agaci.ged',out,'text/plain');
 }
 function dl(fn,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=fn;a.click();}
+function renderChTags(){
+  const wrap=document.getElementById('f_ch_tags');if(!wrap)return;
+  wrap.innerHTML=formChildren.map(cid=>{
+    const p=people[cid];const nm=p?[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz':'?';
+    return `<span class="ch-tag">${nm}<button class="ch-tag-x" onclick="removeChTag('${cid}')" title="Kaldır">×</button></span>`;
+  }).join('')||'<span style="color:var(--text3);font-size:.78rem;padding:2px 4px">Henüz çocuk eklenmedi</span>';
+  const sel=document.getElementById('f_ch_sel');if(!sel)return;
+  const others=Object.values(people).filter(x=>x.id!==editId&&!formChildren.includes(x.id));
+  sel.innerHTML='<option value="">— Mevcut kişiyi seç —</option>'+others.map(x=>{const nm=[x.firstName,x.lastName].filter(Boolean).join(' ')||'İsimsiz';return `<option value="${x.id}">${nm}</option>`;}).join('');
+}
+function addChFromSel(){
+  const sel=document.getElementById('f_ch_sel');const id=sel.value;if(!id)return;
+  if(!formChildren.includes(id))formChildren.push(id);
+  sel.value='';renderChTags();
+}
+function removeChTag(id){formChildren=formChildren.filter(x=>x!==id);renderChTags();}
+function fixDates(){
+  const mo={JAN:"01",FEB:"02",MAR:"03",APR:"04",MAY:"05",JUN:"06",JUL:"07",AUG:"08",SEP:"09",OCT:"10",NOV:"11",DEC:"12"};
+  function conv(d){
+    if(!d)return d;
+    const m1=d.trim().match(/^(\d{1,2})\s+([A-Z]{3})\s+(\d{4})$/i);
+    if(m1&&mo[m1[2].toUpperCase()])return m1[1].padStart(2,"0")+"/"+mo[m1[2].toUpperCase()]+"/"+m1[3];
+    const m2=d.trim().match(/^([A-Z]{3})\s+(\d{4})$/i);
+    if(m2&&mo[m2[1].toUpperCase()])return mo[m2[1].toUpperCase()]+"/"+m2[2];
+    return d;
+  }
+  let count=0;
+  Object.values(people).forEach(p=>{
+    const nb=conv(p.birthDate),nd=conv(p.deathDate);
+    if(nb!==p.birthDate){p.birthDate=nb;count++;}
+    if(nd!==p.deathDate){p.deathDate=nd;count++;}
+  });
+  const res=document.getElementById("dateConvResult");
+  if(count>0){
+    save();renderAll();
+    res.textContent="✅ "+count+" tarih dönüştürüldü.";res.style.display="block";
+    toast("✅ "+count+" tarih dönüştürüldü");
+  }else{
+    res.textContent="ℹ️ Dönüştürülecek tarih bulunamadı (zaten doğru formatta veya veri yok).";res.style.display="block";
+    toast("ℹ️ Dönüştürülecek tarih yok");
+  }
+}
 function clearAll(){if(!confirm('Tüm veriler silinecek. Emin misiniz?'))return;people={};fams={};nextId=1;imgCache={};nodeDrag={};save();renderAll();buildTree();toast('🗑️ Tüm veriler silindi');}
 
 // ══════════════════════════════════════
