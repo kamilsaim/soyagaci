@@ -553,13 +553,18 @@ let people={},fams={},nextId=1;
 let filt='all',bulkMode=false,selIds=new Set();
 let editId=null,mainPhoto=null,gal=[],formChildren=[];
 let missFilt='all';
+let _pendingRelations=[];
 
 function newId(){return 'P'+(nextId++);}
 
 function save(){
   const snap=JSON.stringify({people,fams,nextId});
-  try{localStorage.setItem('sa4',snap);localStorage.setItem('sa4_ts',Date.now());}catch(e){}
-  if(!supaUser)return;
+  if(supaUser){
+    try{localStorage.setItem('sa4',snap);localStorage.setItem('sa4_ts',Date.now());}catch(e){}
+  } else {
+    try{localStorage.setItem('sa4_local',snap);}catch(e){}
+    return;
+  }
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{
     const d=JSON.parse(snap);
@@ -607,12 +612,16 @@ async function load(){
       }
     }catch(e){console.warn('Supabase load hatası:',e);}
   }
-  // localStorage'dan yükle
+  // Yerel mod: sadece sa4_local anahtarını kullan, bulut verisine dokunma
+  if(!supaUser){
+    try{const d=localStorage.getItem('sa4_local');if(d){const o=JSON.parse(d);people=o.people||{};fams=o.fams||{};nextId=o.nextId||1;}}catch(e){}
+    migrateData();return;
+  }
+  // Giriş yapılmış ama Supabase'den yüklenemediyse → sa4'ten (bulut yedek) yükle
   try{const d=localStorage.getItem('sa4');if(d){const o=JSON.parse(d);people=o.people||{};fams=o.fams||{};nextId=o.nextId||1;}}catch(e){}
   migrateData();
-  // Oturum açık ama veriler localStorage'dan geldiyse → Supabase'e pushla
-  if(supaUser&&Object.keys(people).length>0){
-    console.log('localStorage verisi Supabase ile senkronize ediliyor...');
+  if(Object.keys(people).length>0){
+    console.log('localStorage (bulut yedek) Supabase ile senkronize ediliyor...');
     save();
   }
 }
@@ -811,6 +820,7 @@ function inlineAdd(role){
   people[id]={id,firstName:fn,lastName:ln,gender,birthDate:bd,birthPlace:'',
     deathDate:'',deathPlace:'',occupation:'',maidenName:'',maritalStatus:'married',
     notes:'',photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
+  _pendingRelations.push({id,role});
   save();
   // Refresh the relevant select and pre-select new person
   const others=Object.values(people).filter(x=>x.id!==editId);
@@ -885,6 +895,7 @@ function savePerson(){
   const fn=capStr(document.getElementById('f_fn').value.trim());
   const ln=capStr(document.getElementById('f_ln').value.trim());
   if(!fn&&!ln){toast('⚠️ Ad veya soyad girin');return;}
+  const _anchorId=editId;
   const id=editId||newId();
   const old=people[id];
   if(old){
@@ -925,8 +936,10 @@ function savePerson(){
     if(g==='F'&&people[cid].mother!==id)people[cid].mother=id;
     if(g==='M'&&people[cid].father!==id)people[cid].father=id;
   });
+  const _pending=[..._pendingRelations];_pendingRelations=[];
   save();cModal('formModal');renderAll();buildTree();
-  toast(editId?'✅ Güncellendi':'✅ Eklendi');
+  if(_anchorId&&_pending.length)positionNewNodes(_anchorId,_pending);
+  toast(_anchorId?'✅ Güncellendi':'✅ Eklendi');
 }
 
 // ══════════════════════════════════════
@@ -1264,6 +1277,25 @@ async function loadLayout(){
 function focusPerson(id){if(!id)return;const pos=effPos(id);if(!pos)return;sc=1.3;camX=canvas.width/2-(pos.x+NW/2)*sc;camY=canvas.height/3-(pos.y+NH/2)*sc;drawTree();}
 function focusAfterLink(id,role){if(!id)return;setTimeout(()=>{const pos=effPos(id);if(!pos)return;sc=1.3;camX=canvas.width/2-(pos.x+NW/2)*sc;const vp=(role==='ch')?canvas.height*.38:(role==='mo'||role==='fa')?canvas.height*.62:canvas.height/2;camY=vp-(pos.y+NH/2)*sc;drawTree();},150);}
 
+function positionNewNodes(anchorId,pending){
+  const aPos=effPos(anchorId);if(!aPos)return;
+  let spOffset=0,chOffset=0;
+  pending.forEach(({id,role})=>{
+    const base=nodePos[id];if(!base)return;
+    let tx,ty;
+    if(role==='sp'){
+      tx=aPos.x+(NW+HGAP)*(1+spOffset);ty=aPos.y;spOffset++;
+    } else if(role==='ch'){
+      tx=aPos.x+chOffset*(NW+HGAP);ty=aPos.y+(NH+VGAP);chOffset++;
+    } else if(role==='mo'){
+      tx=aPos.x-(NW+HGAP)*0.5;ty=aPos.y-(NH+VGAP);
+    } else if(role==='fa'){
+      tx=aPos.x+(NW+HGAP)*0.5;ty=aPos.y-(NH+VGAP);
+    } else return;
+    nodeDrag[id]={dx:tx-base.x,dy:ty-base.y};
+  });
+  saveLayout();drawTree();
+}
 function buildTree(){
   computeLayout();
   preloadImgs(()=>drawTree());
@@ -1349,10 +1381,11 @@ function renderStats(){
   const surns={};pl.forEach(p=>{if(p.lastName)surns[p.lastName]=(surns[p.lastName]||0)+1;});
   const topS=Object.entries(surns).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const today=new Date();
-  const upcomingBD=pl.filter(p=>!p.deathDate&&p.birthDate).map(p=>{const m=p.birthDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return null;const d=+m[1],mo=+m[2],yr=+m[3];const thisYrBD=new Date(today.getFullYear(),mo-1,d);const bday=thisYrBD>=today?thisYrBD:new Date(today.getFullYear()+1,mo-1,d);const diff=Math.round((bday-today)/864e5);if(diff>30)return null;const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';return{id:p.id,nm,diff,day:m[1],month:m[2],turningAge:bday.getFullYear()-yr};}).filter(Boolean).sort((a,b)=>a.diff-b.diff);
+  const todayMid=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const upcomingBD=pl.filter(p=>!p.deathDate&&p.birthDate).map(p=>{const m=p.birthDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return null;const d=+m[1],mo=+m[2],yr=+m[3];const thisYrBD=new Date(today.getFullYear(),mo-1,d);const bday=thisYrBD>=todayMid?thisYrBD:new Date(today.getFullYear()+1,mo-1,d);const diff=Math.round((bday-todayMid)/864e5);if(diff>30)return null;const nm=[p.firstName,p.lastName].filter(Boolean).join(' ')||'İsimsiz';return{id:p.id,nm,diff,day:m[1],month:m[2],turningAge:bday.getFullYear()-yr};}).filter(Boolean).sort((a,b)=>a.diff-b.diff);
   const BC=['#c8855a','#8faa8a','#7ba3b8','#c9a87c','#b89ab8','#7a9a9a','#d4a878','#8fa8c8'];
   document.getElementById('stCont').innerHTML=`
-    ${upcomingBD.length?`<div class="cbw"><div class="cbt">🎂 Yaklaşan Doğum Günleri</div>${upcomingBD.map(u=>`<div class="life-card" onclick="openDetail('${u.id}')"><div class="life-name">🎂 ${u.nm}</div><div class="life-detail">${u.diff===0?'Bugün 🎉':u.diff===1?'Yarın':u.diff+' gün sonra'} · ${u.day}/${u.month} · ${u.turningAge} yaşına giriyor</div></div>`).join('')}` :''}
+    ${upcomingBD.length?`<div class="cbw"><div class="cbt">🎂 Yaklaşan Doğum Günleri (30 gün)</div>${upcomingBD.map(u=>`<div class="life-card" onclick="openDetail('${u.id}')"><div class="life-name">🎂 ${u.nm}</div><div class="life-detail">${u.diff===0?'Bugün 🎉':u.diff===1?'Yarın 🎁':u.diff+' gün sonra'} · ${u.day}/${u.month} · ${u.turningAge} yaşına giriyor</div></div>`).join('')}</div>` :''}
     <div class="sg">
       <div class="sc"><div class="sn">${total}</div><div class="sl">Toplam Kişi</div></div>
       <div class="sc"><div class="sn">${living}</div><div class="sl">Hayatta</div></div>
@@ -1532,6 +1565,7 @@ async function signInGoogle(){
 }
 async function signOut(){
   await supa.auth.signOut();
+  localStorage.removeItem('sa4');localStorage.removeItem('sa4_ts');
   people={};fams={};nextId=1;nodeDrag={};
   renderAll();buildTree();
 }
