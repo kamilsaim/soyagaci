@@ -548,7 +548,7 @@ let supaUser=null,saveTimer=null;
 //  STATE
 // ══════════════════════════════════════
 const APP_VER='4.5';
-(function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.reload(true);}else{localStorage.setItem(k,APP_VER);}})();
+(function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);const url=location.href.split('?')[0]+'?v='+APP_VER;location.replace(url);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},fams={},nextId=1;
 let filt='all',bulkMode=false,selIds=new Set();
 let editId=null,mainPhoto=null,gal=[],formChildren=[];
