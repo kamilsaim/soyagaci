@@ -1,6 +1,12 @@
 # Soy Ağacı
 
-**Soy Ağacı v4.0**, tamamen tarayıcıda çalışan Türkçe aile ağacı uygulamasıdır. Google hesabıyla giriş yaparak verilerini bulutta sakla ya da çevrimdışı yerel olarak kullan.
+**Soy Ağacı v4.7** 
+
+v4.7 — Ağaçta yeni kişi akıllı konumlandırma (eş yana, çocuk alta, ebeveyn üste), yaklaşan doğum günleri istatistiği, bulut/yerel mod veri ayrımı, otomatik güncelleme cache-buster düzeltmesi
+
+v4.5 — Otomatik güncelleme, ana ekran ikonu, anne/baba cinsiyet filtresi, form düzeni iyileştirmesi, tarih dönüştürücü, modal ortalama
+
+tamamen tarayıcıda çalışan Türkçe aile ağacı uygulamasıdır. Google hesabıyla giriş yaparak verilerini bulutta sakla ya da çevrimdışı yerel olarak kullan.
 
 ---
 
