@@ -540,8 +540,8 @@ textarea{resize:vertical;min-height:65px}
 // ══════════════════════════════════════
 //  SUPABASE
 // ══════════════════════════════════════
-const SUPA_URL='https://nzmxjompdipabkvocfio.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bXhqb21wZGlwYWJrdm9jZmlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NTQzMjgsImV4cCI6MjA5NDEzMDMyOH0.EgM3hCU_8Q6qjYvMLCR9T17eIvZimPrmxLUQrCdQMaI';
+const SUPA_URL='https://mtialokiudmgdctznfiz.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10aWFsb2tpdWRtZ2RjdHpuZml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE5NjgsImV4cCI6MjA5NDY1Nzk2OH0.aznQX7ZiwO031n-xjDFr1bGTzgakoaOBWkGu7wps120';
 const supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);
 let supaUser=null,saveTimer=null;
 
@@ -572,7 +572,7 @@ function save(){
     const pCount=Object.keys(d.people||{}).length;
     const linkCount=Object.values(d.people||{}).filter(p=>p.father||p.mother||(p.children&&p.children.length)).length;
     console.log(`Supabase'e kaydediliyor: ${pCount} kişi, ${linkCount} bağlantılı`);
-    supa.from('family_data').upsert({user_id:supaUser.id,people:d.people,fams:d.fams,next_id:d.nextId},{onConflict:'user_id'})
+    supa.from('soy_family_data').upsert({user_id:supaUser.id,people:d.people,fams:d.fams,next_id:d.nextId},{onConflict:'user_id'})
       .then(({error})=>{
         if(error)console.error('Kaydetme hatası:',error);
         else console.log(`✅ Supabase'e kaydedildi: ${pCount} kişi`);
@@ -594,7 +594,7 @@ function migrateData(){
 async function load(){
   if(supaUser){
     try{
-      const {data}=await supa.from('family_data').select('people,fams,next_id,updated_at').eq('user_id',supaUser.id).single();
+      const {data}=await supa.from('soy_family_data').select('people,fams,next_id,updated_at').eq('user_id',supaUser.id).single();
       if(data){
         const supaCount=Object.keys(data.people||{}).length;
         const hasLinks=supaCount>0&&Object.values(data.people).some(p=>p.father||p.mother||(p.children&&p.children.length));
@@ -1265,13 +1265,13 @@ function resetLayout(){nodeDrag={};save();buildTree();toast('↺ Düzen sıfırl
 function saveLayout(){
   try{localStorage.setItem('sa4nd',JSON.stringify(nodeDrag));}catch(e){}
   if(supaUser){
-    supa.from('node_positions').upsert({user_id:supaUser.id,positions:nodeDrag},{onConflict:'user_id'})
+    supa.from('soy_node_positions').upsert({user_id:supaUser.id,positions:nodeDrag},{onConflict:'user_id'})
       .then(()=>toast('💾 Ağaç konumları kaydedildi!')).catch(()=>toast('💾 Ağaç konumları kaydedildi!'));
   } else {toast('💾 Ağaç konumları kaydedildi!');}
 }
 async function loadLayout(){
   if(supaUser){
-    try{const {data}=await supa.from('node_positions').select('positions').eq('user_id',supaUser.id).single();if(data){nodeDrag=data.positions||{};return;}}catch(e){}
+    try{const {data}=await supa.from('soy_node_positions').select('positions').eq('user_id',supaUser.id).single();if(data){nodeDrag=data.positions||{};return;}}catch(e){}
   }
   try{const d=localStorage.getItem('sa4nd');if(d)nodeDrag=JSON.parse(d);}catch(e){}
 }
