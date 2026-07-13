@@ -1,127 +1,67 @@
+<div align="center">
+
+<img src="logo.png" alt="Soy Ağacı" width="240">
+
 # Soy Ağacı
 
-**Soy Ağacı v4.7** 
+**Ailenin hikayesini tek yerde topla**
 
-v4.7 — Ağaçta yeni kişi akıllı konumlandırma (eş yana, çocuk alta, ebeveyn üste), yaklaşan doğum günleri istatistiği, bulut/yerel mod veri ayrımı, otomatik güncelleme cache-buster düzeltmesi
+_Tarayıcıda çalışan, Türkçe, ücretsiz aile ağacı uygulaması_
 
-v4.5 — Otomatik güncelleme, ana ekran ikonu, anne/baba cinsiyet filtresi, form düzeni iyileştirmesi, tarih dönüştürücü, modal ortalama
+[**▶ Uygulamayı Aç**](https://kamilsaim.github.io/soyagaci/)
 
-tamamen tarayıcıda çalışan Türkçe aile ağacı uygulamasıdır. Google hesabıyla giriş yaparak verilerini bulutta sakla ya da çevrimdışı yerel olarak kullan.
-
----
-
-## Özellikler
-
-### Kişi Yönetimi
-- Kişi ekleme, düzenleme ve silme
-- Ad, soyad, kızlık soyadı, cinsiyet bilgileri
-- Doğum / ölüm tarihi ve yeri
-- Meslek ve notlar
-- Ana fotoğraf + fotoğraf galerisi desteği
-
-### Aile İlişkileri
-- Anne / baba bağlantıları
-- Eş / partner bağlantıları (evli, boşanmış, dul, partner)
-- Çocuk bağlantıları
-- Düzenleme sırasında hızlı kişi ekleme
-
-### İnteraktif Ağaç Görselleştirme
-- Canvas tabanlı aile ağacı
-- Sürükle-bırak ile gezinme ve düğüm taşıma
-- Mouse tekerleği ve pinch zoom (mobil)
-- Çift tıklama ile kişi detayı
-- Renk kodlaması: mavi (erkek), pembe (kadın)
-- Evlilik / boşanma simgeleri (♥ / 💔)
-
-### Liste Görünümü
-- Ad ile arama ve filtreleme
-- Filtreler: Tümü, Erkek, Kadın, Yaşıyor, Vefat etti
-- Toplu seçim ve silme
-
-### İstatistik Paneli
-- Toplam kişi, cinsiyet dağılımı
-- Yaşayan / vefat etmiş sayısı
-- Ortalama yaşam süresi
-- En yaşlı / en genç vefat kaydı
-- En çok tekrarlanan isimler
-- Doğum on yılı dağılımı
-- En sık doğum yerleri, soyadı listesi
-
-### Eksik Veri Raporu
-- Ad, soyad, doğum tarihi olmayan veya bağlantısız kişiler
-- Hızlı düzenleme erişimi
-
-### İçe / Dışa Aktarma
-- **GEDCOM (.ged)** içe aktarma — MyHeritage, Ancestry uyumlu
-- **GEDCOM (.ged)** dışa aktarma (INDI + FAM kayıtları)
-- **JSON** yedek dosyası dışa aktarma
-- Sürükle-bırak ile dosya içe aktarma
-- Yerleşik demo veri seti
+</div>
 
 ---
+
+## Soy Ağacı nedir?
+
+Soy Ağacı, ailenizin nesiller boyu bilgisini — kim kiminle evli, kimin çocuğu kim, kim ne zaman doğmuş/vefat etmiş — tek bir yerde toplayıp görsel bir ağaç hâlinde gezmenizi sağlayan bir uygulamadır. Kurulum gerektirmez, herhangi bir cihazın tarayıcısından anında açılır.
+
+Google hesabınızla giriş yaparsanız verileriniz bulutta güvenle saklanır ve tüm cihazlarınızdan erişilebilir olur; isterseniz hiç giriş yapmadan tamamen çevrimdışı, sadece kendi cihazınızda da kullanabilirsiniz.
+
+## Nasıl çalışır?
+
+1. **Giriş yap** — Google hesabınla bulut yedekli kullan, ya da "Yerel olarak kullan" diyerek çevrimdışı devam et
+2. **Kişi ekle** — Ad, soyad, doğum/ölüm bilgisi, fotoğraf ve meslek gibi detayları gir
+3. **Bağlantı kur** — Anne, baba, eş ve çocuk ilişkilerini seçerek ağacı büyüt
+4. **Ağacı keşfet** — Canvas üzerinde sürükleyerek, yakınlaştırıp uzaklaştırarak dolaş
+5. **İstatistiklere bak** — Ailenin yaş dağılımı, en sık isimler, doğum yerleri gibi bilgileri gör
+
+## Öne çıkan özellikler
+
+- 🌳 **İnteraktif ağaç görünümü** — sürükle-bırak, yakınlaştırma, akıllı otomatik yerleşim
+- ☁️ **Bulut yedekleme** — Google ile giriş yapınca veriler otomatik senkronlanır
+- 📴 **Çevrimdışı mod** — internet olmadan da tamamen kullanılabilir
+- 💑 **Zengin aile ilişkileri** — çoklu eş, boşanmış/dul/partner durumları, kızlık soyadı
+- 📸 **Fotoğraf galerisi** — kişi başına ana fotoğraf + galeri, lightbox görüntüleme
+- 📊 **İstatistik paneli** — yaş, isim, soyadı ve doğum yeri analizleri
+- 🔍 **Eksik veri raporu** — hangi kişilerde bilgi eksik, tek tıkla görüp tamamla
+- 📁 **GEDCOM desteği** — MyHeritage / Ancestry'den gelen `.ged` dosyalarını içe aktar, dışa aktar
 
 ## Teknoloji
 
-| Katman | Kullanılan |
-|--------|-----------|
-| Arayüz | Vanilla HTML5 / CSS3 / JavaScript |
-| Görselleştirme | Canvas API |
-| Veri Saklama | `localStorage` + Supabase (bulut) |
-| Kimlik Doğrulama | Supabase Auth — Google OAuth |
-| Bağımlılık | Supabase JS v2 CDN (opsiyonel) |
-
----
-
-## Kurulum
-
-Herhangi bir kurulum gerekmez:
-
-```
-soy-agaci.html dosyasını tarayıcıda aç → kullanmaya başla
-```
-
-Google ile giriş yaparak Supabase bulut yedeklemesini etkinleştirebilir ya da "Yerel olarak kullan" butonuyla çevrimdışı devam edebilirsin.
-
----
-
-## Dosya Yapısı
-
-```
-temiz son/
-├── soy-agaci.html   # Uygulamanın tamamı (HTML + CSS + JS)
-├── temiz146.ged     # Örnek GEDCOM veri dosyası (146 kişi)
-└── README.md        # Bu dosya
-```
-
----
-
-## Veri Yapısı
-
-**localStorage (çevrimdışı mod):**
-```
-sa4   → { people: {...}, fams: {...}, nextId: number }
-sa4nd → { [kişiId]: { x, y } }  // ağaç düğüm pozisyonları
-```
-
-**Supabase (bulut mod):**
-```
-family_data   → { user_id, people, fams, next_id }
-node_positions → { user_id, positions }
-```
-
----
+Tamamen tek dosyalık bir web uygulaması olarak [Supabase](https://supabase.com) üzerinde kimlik doğrulama (Google OAuth) ve bulut veritabanı kullanır; arayüz herhangi bir framework olmadan saf HTML/CSS/JavaScript ile yazılmıştır. [GitHub Pages](https://pages.github.com) üzerinden yayınlanır ve Capacitor ile Android APK olarak da paketlenebilir.
 
 ## Sürüm Geçmişi
 
-| Sürüm | Değişiklikler |
+| Sürüm | Öne çıkanlar |
 |-------|--------------|
-| v4.0 | Google ile giriş (Supabase Auth), bulut yedekleme, aile arması logosu, PWA favicon, mobil alt menü, animasyonlu simgeler |
-| v3.0 | Fotoğraf galerisi, gelişmiş ilişki yönetimi, istatistik paneli, eksik veri raporu |
-| v2.0 | Canvas ağaç görselleştirme, GEDCOM içe/dışa aktarma |
-| v1.0 | Temel kişi yönetimi, liste görünümü |
+| **4.7** | Ağaçta yeni kişi eklerken akıllı otomatik yerleşim (eş yana, çocuk alta, ebeveyn üste) |
+| **4.5** | Otomatik güncelleme sistemi, ana ekran ikonu, gelişmiş form düzeni |
+| **4.0** | Google ile giriş, bulut yedekleme, aile arması logosu, mobil alt menü |
+| **3.0** | Eksik veri raporu, hızlı kişi ekleme, ağaç konumlarını hatırlama |
+| **2.5** | Boşanmış eşler 💔, kızlık soyadı, yaşam istatistikleri |
+| **2.0** | Sürüklenebilir canvas ağaç görünümü, çift tıkla kart açma |
+| **1.5** | Fotoğraf galerisi ve toplu silme |
+| **1.0** | İlk sürüm — GEDCOM içe/dışa aktarma, liste ve ağaç görünümü |
+
+## Katkı
+
+Ailenden biri misin? Uygulamayı aç, kendi Google hesabınla giriş yap ve kendi bildiklerini ekle — ağaç herkesin katkısıyla büyür.
 
 ---
 
-## Lisans
-
-Kişisel kullanım.
+<div align="center">
+<sub>🌳 Aile, nesilden nesile aktarılan bir hikayedir — Soy Ağacı onu yaşatır.</sub>
+</div>
