@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-5.0-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-5.1-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -62,6 +62,8 @@ Canvas üzerinde sürüklenebilir, yakınlaştırılabilir aile ağacı. Kuşakl
 ### 📸 Fotoğraf galerisi
 Kişi başına bir ana fotoğraf ve sınırsız galeri. Sürükle-bırak ile yükleyin, tam ekran lightbox'ta gezin, ok tuşlarıyla ilerleyin.
 
+Fotoğraflar yüklenirken otomatik küçültülür (en uzun kenar 1400 px, JPEG) ve **buluttaki özel deponuza** kaydedilir — ağaç verisinin kendisi küçük ve hızlı kalır. Depo herkese kapalıdır; görüntüleme kısa ömürlü imzalı bağlantılarla yapılır ve yalnızca sizin oturumunuz erişebilir. Bir fotoğraf artık hiçbir kişide kullanılmıyorsa kendiliğinden silinir.
+
 ### 📊 İstatistikler
 Toplam kişi, hayatta olanlar, **kuşak sayısı**, vefat edenlerin ortalama ömrü, yaşayanların ortalama yaşı, yaşam rekorları, en sık isimler, on yıllara göre doğum grafiği, doğum yerleri ve soyadı dağılımı. Ayrıca **30 gün içindeki doğum günleri** 🎂 listelenir.
 
@@ -70,7 +72,7 @@ Hangi kişide ad, soyad, doğum tarihi, fotoğraf ya da bağlantı eksik — tek
 
 ### 📁 İçe / dışa aktarma
 - **GEDCOM 5.5.1** — MyHeritage, Ancestry ve benzeri programlarla iki yönlü uyum. Dışa aktarımda `FAMC`/`FAMS` işaretçileri, kızlık soyadı ve standart tarih biçimi yazılır.
-- **JSON yedek** — fotoğraflar dâhil her şeyi içerir ve aynı butonla geri yüklenir.
+- **JSON yedek** — tüm kişileri, bağlantıları ve fotoğraf referanslarını içerir; aynı butonla geri yüklenir. Bulut fotoğraflarının kendisi ayrı depoda durur, yedek dosyasında yalnızca bağlantıları bulunur (yani yedek aynı hesapta geri yüklenmelidir).
 - Üzerine yazacak her içe aktarma işlemi önce onay sorar.
 
 ### ☁️ Güvenli senkronizasyon
@@ -82,7 +84,8 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 - Veriler kişisel Supabase projesinde, **satır bazlı güvenlik (RLS)** ile saklanır: her kullanıcı yalnızca kendi satırını okuyabilir ve yazabilir.
 - Giriş yapmadan kullanırken hiçbir veri cihazdan dışarı çıkmaz.
-- Fotoğraflar kaydın içine gömülür. Çok sayıda yüksek çözünürlüklü fotoğraf tarayıcı depolama sınırını zorlayabilir; uygulama sınır dolduğunda uyarır. Fotoğrafları yüklemeden önce küçültmeniz önerilir.
+- Fotoğraflar ayrı, **herkese kapalı** bir Supabase Storage kovasında `{kullanıcı-kimliği}/…` yolunda saklanır; depo politikaları başka kimsenin klasörünüze erişmesine izin vermez.
+- Giriş yapmadan kullanırken fotoğraflar (küçültülmüş hâlde) tarayıcıda saklanır; çok sayıda fotoğrafta depolama sınırı dolabilir, uygulama sizi uyarır.
 - **Düzenli JSON yedeği alın.** Ayarlar → *JSON Yedek Al*.
 
 ---
@@ -95,6 +98,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 | Dağıtım | Tek `index.html` dosyası, GitHub Pages üzerinden yayınlanır |
 | Kimlik | Supabase Auth (Google OAuth) |
 | Veri | Supabase Postgres (`soy_family_data`, `soy_node_positions`), RLS açık |
+| Fotoğraf | Supabase Storage — özel `soy-fotograf` kovası, kullanıcı bazlı erişim politikaları |
 | Çizim | HTML5 Canvas, `devicePixelRatio` desteğiyle retina/mobil ekranlarda net |
 | Mobil | Capacitor ile Android APK olarak paketlenebilir |
 
@@ -104,6 +108,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **5.1** | Fotoğraflar Supabase Storage'a taşındı, yüklemede otomatik küçültme, kullanılmayan fotoğrafların otomatik temizliği; kullanılmayan `fams` alanı kaldırıldı |
 | **5.0** | **Büyük kararlılık sürümü.** Çoklu eş düzenlemede artık kaybolmuyor · GED/JSON/demo yüklemeden önce onay · JSON yedeği geri yükleme · bulut hata ve çakışma bildirimi · Türkçe büyük harf düzeltmesi (İbrahim) · tüm tarih biçimleri tek kalıba · retina/mobil net çizim · tek tıkla kart açma · düğüm konumları otomatik kayıt · soy döngüsü koruması · kuşak sayısı istatistiği · XSS koruması |
 | **4.7** | Yeni kişi eklerken akıllı otomatik yerleşim, yaklaşan doğum günleri |
 | **4.5** | Otomatik güncelleme sistemi, ana ekran ikonu, gelişmiş form düzeni |
