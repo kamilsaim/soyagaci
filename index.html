@@ -579,7 +579,7 @@ let supaUser=null,saveTimer=null;
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
-const APP_VER='5.1';
+const APP_VER='5.2';
 (function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.replace(location.origin+location.pathname+'?v='+APP_VER+location.hash);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},nextId=1;
 let filt='all',bulkMode=false,selIds=new Set();
@@ -587,6 +587,11 @@ let editId=null,mainPhoto=null,gal=[],formChildren=[],formSpouses=[];
 let missFilt='all';
 let _pendingRelations=[],_tempNewIds=[];
 let _serverTs=0,_lsWarned=false,_hintShown=false;
+// Buluta henüz gitmemiş değişiklik takibi: sa4_dirty=uid, sa4_base=yerel kopyanın dayandığı bulut sürümü (updated_at ms)
+let _saveGen=0,_pushQ=Promise.resolve();
+function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function _lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function _lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 
 // ── Fotoğraf deposu (Supabase Storage) ──
 const PHOTO_BUCKET='soy-fotograf';
@@ -774,14 +779,18 @@ function save(){
   const snap=JSON.stringify({people,nextId,uid:supaUser?supaUser.id:null});
   if(!supaUser){_lsWrite('sa4_local',snap);return;}
   _lsWrite('sa4',snap);
+  _lsSet('sa4_dirty',supaUser.id);_lsSet('sa4_base',String(_serverTs||0));
+  const gen=++_saveGen;
   clearTimeout(saveTimer);
   setSync('saving');
-  saveTimer=setTimeout(()=>{pushToCloud(JSON.parse(snap));},800);
+  // Yüklemeler sıraya alınır — eski bir anlık görüntü yenisinin üzerine yazamaz
+  saveTimer=setTimeout(()=>{saveTimer=null;_pushQ=_pushQ.then(()=>pushToCloud(JSON.parse(snap),false,gen));},800);
 }
 
 // Buluta yaz. Başka bir cihaz araya girdiyse üzerine yazmadan önce sorar.
-async function pushToCloud(d,force){
+async function pushToCloud(d,force,gen){
   if(!supaUser)return;
+  if(gen&&gen<_saveGen)return;   // arkadan daha yeni bir kayıt geliyor
   const pCount=Object.keys(d.people||{}).length;
   try{
     if(!force&&_serverTs){
@@ -790,8 +799,13 @@ async function pushToCloud(d,force){
       if(curTs>_serverTs+2000){
         setSync('err','Başka cihazla çakışma');
         const ok=await askConfirm('Bu ağaç başka bir cihazdan güncellenmiş. Buradaki '+pCount+' kişilik sürüm bulutun üzerine yazılsın mı?','Üzerine yaz');
-        if(!ok){toast('↻ Buluttaki sürüm yükleniyor…');await load();await loadLayout();await ensurePhotoUrls();renderAll();buildTree();return;}
-        return pushToCloud(d,true);
+        if(!ok){
+          // Yerel değişiklikler bilerek bırakılıyor — yoksa load() yine yereli seçip bulutu ezerdi
+          clearTimeout(saveTimer);saveTimer=null;_saveGen++;
+          _lsDel('sa4_dirty');_lsDel('sa4');
+          toast('↻ Buluttaki sürüm yükleniyor…');await load();await loadLayout();await ensurePhotoUrls();imgCache={};renderAll();buildTree();return;
+        }
+        return pushToCloud(d,true,gen);
       }
     }
     const {data,error}=await supa.from('soy_family_data')
@@ -799,6 +813,7 @@ async function pushToCloud(d,force){
       .select('updated_at').single();
     if(error)throw error;
     _serverTs=data&&data.updated_at?new Date(data.updated_at).getTime():Date.now();
+    if(!gen||gen===_saveGen){_lsDel('sa4_dirty');_lsSet('sa4_base',String(_serverTs));}
     setSync('ok');
     console.log(`✅ Supabase'e kaydedildi: ${pCount} kişi`);
   }catch(e){
@@ -810,11 +825,12 @@ async function pushToCloud(d,force){
 
 function migrateData(){
   Object.values(people).forEach(p=>{
-    if(!p.gallery)p.gallery=[];
+    if(!Array.isArray(p.gallery))p.gallery=[];
     if(!p.maidenName)p.maidenName='';
     if(!p.maritalStatus)p.maritalStatus='married';
-    if(!p.spouses)p.spouses=p.spouse?[{id:p.spouse,status:p.maritalStatus}]:[];
-    if(!p.children)p.children=[];
+    if(!Array.isArray(p.spouses))p.spouses=p.spouse?[{id:p.spouse,status:p.maritalStatus}]:[];
+    p.spouses=p.spouses.filter(s=>s&&typeof s==='object'&&s.id);
+    if(!Array.isArray(p.children))p.children=[];
     if(p.gender==='U')p.gender='M';
   });
 }
@@ -831,23 +847,30 @@ function _readLocalSnap(){
 
 async function load(){
   if(supaUser){
-    let data=null;
+    let data=null,failed=false;
     try{
       const r=await supa.from('soy_family_data').select('people,next_id,updated_at').eq('user_id',supaUser.id).maybeSingle();
       data=r.data;
-      if(r.error)console.warn('Supabase load uyarısı:',r.error);
-    }catch(e){console.warn('Supabase load hatası:',e);}
+      if(r.error){failed=true;console.warn('Supabase load uyarısı:',r.error);}
+    }catch(e){failed=true;console.warn('Supabase load hatası:',e);}
+
+    const dirty=_lsGet('sa4_dirty')===supaUser.id;
+    const baseRaw=_lsGet('sa4_base');
+    const baseTs=parseInt(baseRaw||'0')||0;
 
     if(data){
       _serverTs=data.updated_at?new Date(data.updated_at).getTime():0;
       const supaCount=Object.keys(data.people||{}).length;
-      const lsTs=parseInt(localStorage.getItem('sa4_ts')||'0');
       const lsObj=_readLocalSnap();
       const lsCount=lsObj?Object.keys(lsObj.people||{}).length:0;
 
-      // 1) Yerel kopya buluttan belirgin şekilde yeniyse yerel kazanır
-      if(lsObj&&lsCount>0&&lsTs>_serverTs+5000){
-        console.log('localStorage daha yeni ('+new Date(lsTs).toLocaleTimeString()+'), Supabase senkronize ediliyor…');
+      // 1) Bu cihazda buluta gitmemiş değişiklik varsa yerel kazanır.
+      //    _serverTs yerel kopyanın dayandığı sürüme çekilir; arada başka cihaz yazdıysa pushToCloud sorar.
+      //    (sa4_base yoksa v5.1 öncesi kayıt: eski zaman damgası kuralı bir kereliğine uygulanır)
+      const legacyNewer=baseRaw===null&&parseInt(_lsGet('sa4_ts')||'0')>_serverTs+5000;
+      if(lsObj&&lsCount>0&&(dirty||legacyNewer)){
+        console.log('Buluta gitmemiş yerel değişiklikler bulundu, senkronize ediliyor…');
+        if(dirty)_serverTs=baseTs||1;
         people=lsObj.people||{};nextId=lsObj.nextId||1;
         migrateData();save();return;
       }
@@ -868,6 +891,14 @@ async function load(){
     const lsObj=_readLocalSnap();
     if(lsObj){people=lsObj.people||{};nextId=lsObj.nextId||1;}
     migrateData();
+    if(failed){
+      // Bulut okunamadı (ağ hatası vb.): yereli göster ama buluta İTME.
+      // Sonraki kayıtlarda çakışma kontrolü çalışsın diye taban sürüm ayarlanır.
+      _serverTs=baseTs||1;
+      setSync('err','Bulut okunamadı — çevrimdışı');
+      toast('⚠️ Buluta ulaşılamadı — bu cihazdaki kopya gösteriliyor');
+      return;
+    }
     if(Object.keys(people).length>0){console.log('Yerel yedek Supabase ile senkronize ediliyor…');save();}
     return;
   }
@@ -895,6 +926,13 @@ function autoCap(el){
 }
 
 // ── GED PARSER ──
+// "Mehmet Ali /Kara Yılmaz/" -> {fn:'Mehmet Ali', ln:'Kara Yılmaz'}; eğik çizgi yoksa son kelime soyadı
+function splitGedName(v){
+  const m=String(v||'').match(/^([^\/]*)\/([^\/]*)\/?(.*)$/);
+  if(m)return{fn:(m[1]+' '+m[3]).trim().replace(/\s+/g,' '),ln:m[2].trim()};
+  const p=String(v||'').trim().split(/\s+/).filter(Boolean);
+  return{fn:p.slice(0,-1).join(' ')||p[0]||'',ln:p.length>1?p[p.length-1]:''};
+}
 function parseGED(txt){
   const lines=txt.split(/\r?\n/);
   let cur=null,tag=null,tP={},tF={};
@@ -911,9 +949,16 @@ function parseGED(txt){
     }
     if(!cur)continue;
     if(cur._t==='I'){
-      if(lv===1&&t==='NAME'){const p=v.replace(/\//g,'').trim().split(/\s+/);cur.fn=p.slice(0,-1).join(' ')||p[0]||'';cur.ln=p.length>1?p[p.length-1]:'';}
+      if(lv===1&&t==='NAME'){
+        const nm=splitGedName(v);
+        // İlk NAME asıl addır; sonrakiler (ör. "2 TYPE birth") kızlık soyadı olarak alınır
+        if(cur.fn===undefined){cur.fn=nm.fn;cur.ln=nm.ln;}
+        else if(nm.ln&&nm.ln!==cur.ln&&!cur.mn)cur.mn=nm.ln;
+      }
       if(lv===1&&t==='SEX')cur.gn=v==='M'?'M':'F';
-      if(lv===1&&(t==='BIRT'||t==='DEAT'||t==='OCCU'||t==='NOTE')){tag=t;if(t==='OCCU')cur.oc=v;if(t==='NOTE')cur.no=(cur.no||'')+v+' ';}
+      if(lv===1&&(t==='BIRT'||t==='DEAT'||t==='OCCU'||t==='NOTE')){tag=t;if(t==='OCCU')cur.oc=v;if(t==='NOTE')cur.no=(cur.no?cur.no+'\n':'')+v;}
+      if(lv===2&&tag==='NOTE'&&t==='CONT')cur.no=(cur.no||'')+'\n'+v;
+      if(lv===2&&tag==='NOTE'&&t==='CONC')cur.no=(cur.no||'')+v;
       if(lv===2&&tag==='BIRT'&&t==='DATE')cur.bd=v;
       if(lv===2&&tag==='BIRT'&&t==='PLAC')cur.bp=v;
       if(lv===2&&tag==='DEAT'&&t==='DATE')cur.dd=v;
@@ -934,7 +979,7 @@ function parseGED(txt){
     const pid=im[gid];
     people[pid]={id:pid,firstName:capStr(src.fn||''),lastName:capStr(src.ln||''),gender:src.gn||'M',
       birthDate:normDate(src.bd||''),birthPlace:capStr(src.bp||''),deathDate:normDate(src.dd||''),deathPlace:capStr(src.dp||''),
-      occupation:capStr(src.oc||''),notes:(src.no||'').trim(),maidenName:'',maritalStatus:'married',
+      occupation:capStr(src.oc||''),notes:(src.no||'').trim(),maidenName:src.gn==='F'?capStr(src.mn||''):'',maritalStatus:'married',
       photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
   }
   for(const fam of Object.values(tF)){
@@ -970,6 +1015,9 @@ async function importJSONText(txt){
   if(!o||typeof o!=='object'||!o.people||typeof o.people!=='object'){toast('⚠️ Bu dosya bir Soy Ağacı yedeği değil');return;}
   const n=Object.keys(o.people).length;
   if(!n){toast('⚠️ Yedekte hiç kişi yok');return;}
+  // Kimlikler onclick içine yazılıyor — yalnızca güvenli karakterlere izin ver (kötü niyetli yedek dosyasına karşı)
+  const bad=Object.entries(o.people).some(([k,v])=>!/^[A-Za-z0-9_\-]{1,40}$/.test(k)||!v||typeof v!=='object'||(v.id&&v.id!==k));
+  if(bad){toast('⚠️ Yedek dosyası bozuk veya geçersiz kimlik içeriyor');return;}
   const cur=Object.keys(people).length;
   if(cur&&!await askConfirm('Mevcut '+cur+' kişilik ağacınız silinip yedekteki '+n+' kişi yüklenecek. Devam edilsin mi?','Yükle'))return;
   people=o.people;
@@ -1231,7 +1279,7 @@ function openForm(id){
     formChildren=[...(p.children||[])].filter(cid=>people[cid]);
     gal=[...(p.gallery||[])];mainPhoto=p.photo||null;
     if(mainPhoto&&!gal.includes(mainPhoto))gal.unshift(mainPhoto);
-    mainPhoto?showMain(mainPhoto):hideMain();
+    mainPhoto?showMain(photoSrc(mainPhoto)):hideMain();
   } else {
     ['f_fn','f_ln','f_bd','f_bp','f_dd','f_dp','f_oc','f_ms','f_no'].forEach(i=>document.getElementById(i).value='');
     setG('M');hideMain();
@@ -1318,6 +1366,9 @@ function savePerson(){
   });
   newChildren.forEach(cid=>{
     const c=people[cid];if(!c)return;
+    // Çocuğun önceki annesi/babası farklıysa, onun çocuk listesinden çıkar (yoksa iki ebeveynde birden görünür)
+    const prev=g==='F'?c.mother:c.father;
+    if(prev&&prev!==id&&people[prev])people[prev].children=(people[prev].children||[]).filter(x=>x!==cid);
     if(g==='F')c.mother=id;else c.father=id;
   });
 
@@ -1339,7 +1390,7 @@ function delP(id){
   const p=people[id];if(!p)return;
   if(p.mother&&people[p.mother])people[p.mother].children=people[p.mother].children.filter(c=>c!==id);
   if(p.father&&people[p.father])people[p.father].children=people[p.father].children.filter(c=>c!==id);
-  (p.spouses||[]).forEach(s=>{if(people[s.id]){people[s.id].spouses=(people[s.id].spouses||[]).filter(x=>x.id!==id);if(!people[s.id].spouses.length)people[s.id].spouse=null;}});
+  (p.spouses||[]).forEach(s=>{if(people[s.id]){people[s.id].spouses=(people[s.id].spouses||[]).filter(x=>x.id!==id);people[s.id].spouse=(people[s.id].spouses[0]||{}).id||null;}});
   (p.children||[]).forEach(cid=>{if(people[cid]){if(people[cid].mother===id)people[cid].mother=null;if(people[cid].father===id)people[cid].father=null;}});
   delete people[id];delete imgCache[id];delete nodeDrag[id];
 }
@@ -2090,8 +2141,13 @@ async function signInGoogle(){
   await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
 }
 async function signOut(){
+  // Bekleyen kaydı hemen gönder; hâlâ buluta gitmemiş değişiklik varsa uyar (çıkış yerel kopyayı siler)
+  if(saveTimer){clearTimeout(saveTimer);saveTimer=null;const gen=_saveGen;_pushQ=_pushQ.then(()=>pushToCloud({people,nextId},false,gen));}
+  await _pushQ;
+  if(supaUser&&_lsGet('sa4_dirty')===supaUser.id&&
+     !await askConfirm('Bazı değişiklikler henüz buluta kaydedilemedi. Çıkış yaparsanız bu cihazdaki kaydedilmemiş değişiklikler kaybolacak. Yine de çıkılsın mı?','Çıkış yap'))return;
   await supa.auth.signOut();
-  ['sa4','sa4_ts','sa4nd'].forEach(k=>localStorage.removeItem(k));
+  ['sa4','sa4_ts','sa4nd','sa4_dirty','sa4_base'].forEach(_lsDel);
   people={};nextId=1;nodeDrag={};imgCache={};photoUrls={};_serverTs=0;
   setSync('');
   renderAll();buildTree();

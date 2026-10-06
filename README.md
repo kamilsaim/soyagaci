@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-5.1-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-5.2-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -76,7 +76,7 @@ Hangi kişide ad, soyad, doğum tarihi, fotoğraf ya da bağlantı eksik — tek
 - Üzerine yazacak her içe aktarma işlemi önce onay sorar.
 
 ### ☁️ Güvenli senkronizasyon
-Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük gösterge kaydın durumunu belli eder (⟳ kaydediliyor · ✓ kaydedildi · ! hata). Aynı ağacı iki cihazdan aynı anda düzenlerseniz uygulama üzerine yazmadan önce sizi uyarır.
+Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük gösterge kaydın durumunu belli eder (⟳ kaydediliyor · ✓ kaydedildi · ! hata). Aynı ağacı iki cihazdan düzenlerseniz uygulama üzerine yazmadan önce sizi uyarır; "buluttakini yükle" derseniz bulut sürümü korunur. Bağlantı koparsa değişiklikler cihazda bekler ve bağlantı gelince gönderilir — cihaz saatinin yanlış olması başka cihazdaki değişiklikleri silemez. Buluta gönderilmemiş değişiklik varken çıkış yapmak isterseniz uygulama sizi uyarır.
 
 ---
 
@@ -108,6 +108,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **5.2** | **Güvenlik ve senkronizasyon denetimi.** Çakışmada bulut sürümü artık korunuyor · cihaz saati farkı veri silemiyor · bağlantı hatasında eski veri buluta gönderilmiyor · çıkışta kaydedilmemiş değişiklik uyarısı · düzenleme formunda bulut fotoğrafı görünüyor · GED aktarımında kızlık soyadı ve çok satırlı notlar korunuyor · ebeveyn/eş bağlantı düzeltmeleri · JSON yedek dosyası doğrulaması |
 | **5.1** | Fotoğraflar Supabase Storage'a taşındı, yüklemede otomatik küçültme, kullanılmayan fotoğrafların otomatik temizliği; kullanılmayan `fams` alanı kaldırıldı |
 | **5.0** | **Büyük kararlılık sürümü.** Çoklu eş düzenlemede artık kaybolmuyor · GED/JSON/demo yüklemeden önce onay · JSON yedeği geri yükleme · bulut hata ve çakışma bildirimi · Türkçe büyük harf düzeltmesi (İbrahim) · tüm tarih biçimleri tek kalıba · retina/mobil net çizim · tek tıkla kart açma · düğüm konumları otomatik kayıt · soy döngüsü koruması · kuşak sayısı istatistiği · XSS koruması |
 | **4.7** | Yeni kişi eklerken akıllı otomatik yerleşim, yaklaşan doğum günleri |
