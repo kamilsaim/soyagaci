@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-5.2-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-6.0-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -37,7 +37,7 @@ Kurulum yok, hesap açma zorunluluğu yok. Bağlantıyı açtığınız anda ça
 | **1** | [Uygulamayı aç](https://kamilsaim.github.io/soyagaci/) → Google ile giriş yap veya **Yerel olarak kullan**'a tıkla |
 | **2** | **+ Kişi** ile ilk kişiyi ekle — ya da elinizde `.ged` dosyası varsa **GED Yükle** ile hepsini birden aktar |
 | **3** | Formdaki **Anne / Baba / Eşler / Çocuklar** alanlarından bağlantıları kur. Kişi listede yoksa **➕ Yeni … Ekle** ile aynı ekrandan oluştur |
-| **4** | **🌳 Ağaç** sekmesinde sürükleyerek gez, düğümleri istediğin yere taşı |
+| **4** | **🌳 Ağaç** sekmesinde **🎯 Odak** ile bir kişinin çevresini, **Tüm Ağaç** ile bütün aileyi gez |
 | **5** | **⚙️ Ayarlar → JSON Yedek Al** ile düzenli yedek al |
 
 ---
@@ -45,14 +45,21 @@ Kurulum yok, hesap açma zorunluluğu yok. Bağlantıyı açtığınız anda ça
 ## Özellikler
 
 ### 🌳 Ağaç görünümü
-Canvas üzerinde sürüklenebilir, yakınlaştırılabilir aile ağacı. Kuşaklar otomatik hizalanır, beğenmediğiniz yerleşimi elle düzeltebilirsiniz — taşıdığınız her düğüm kendiliğinden kaydedilir.
+İki görünüm var:
+
+- **🎯 Odak** — seçtiğiniz kişi ortada; üstte ataları (dede–nine, büyük dedeler), yanında eşi ve kardeşleri, altta çocukları ve torunları. Başka bir karta dokununca ağaç yumuşak bir geçişle o kişiye kayar. Kaç kuşak gösterileceği ⬆ / ⬇ ile seçilir.
+- **🌳 Tüm Ağaç** — bütün aile tek tabloda. Çocuklar hangi evlilikten olduklarına göre gruplanır, gelin ve damatların aileleri bağlı oldukları kişinin üstüne yerleşir. Listeden bir kişi seçince o kişinin soy hattı vurgulanır.
+
+Kartlarda fotoğraf, ad–soyad (kızlık soyadıyla), doğum–ölüm yılları ve yaş görünür; evlilikler ♥ evli · 💔 boşanmış · 🕊 dul · 🤝 partner rozetiyle gösterilir.
 
 | Hareket | Sonuç |
 |---|---|
 | Sürükle | Ağacı kaydır |
-| Tık / dokunuş | Kişi kartını aç |
-| Uzun bas + sürükle | Düğümü taşı (otomatik kaydedilir) |
+| Tık / dokunuş (Odak) | O kişiye geç — ortadaki karta dokununca kişi kartı açılır |
+| Tık / dokunuş (Tüm Ağaç) | Kişi kartını aç |
+| Uzun bas | Odak: kişi kartı · Tüm Ağaç: düğümü taşı (otomatik kaydedilir) |
 | Fare tekerleği / iki parmak | Yakınlaştır–uzaklaştır |
+| `📷` | Ağacı resim (PNG) olarak indir |
 | `⛶` | Tüm ağacı ekrana sığdır |
 | `↺` | Elle yapılan yerleşimi sıfırla |
 
@@ -108,6 +115,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **6.0** | **Yeni ağaç görünümü ve yeni logo.** 🎯 Odak görünümü (kişi ortada, atalar üstte, torunlar altta, animasyonlu geçiş) · Tüm Ağaç yerleşimi baştan yazıldı (çocuklar evliliğe göre gruplu, soy hattı vurgusu) · yatay kartlar, evlilik rozetleri, kuşak etiketleri · PNG olarak indirme · kişi kartında “🌳 Ağaçta” · sayfa boyutu 6,4 MB → 1 MB |
 | **5.2** | **Güvenlik ve senkronizasyon denetimi.** Çakışmada bulut sürümü artık korunuyor · cihaz saati farkı veri silemiyor · bağlantı hatasında eski veri buluta gönderilmiyor · çıkışta kaydedilmemiş değişiklik uyarısı · düzenleme formunda bulut fotoğrafı görünüyor · GED aktarımında kızlık soyadı ve çok satırlı notlar korunuyor · ebeveyn/eş bağlantı düzeltmeleri · JSON yedek dosyası doğrulaması |
 | **5.1** | Fotoğraflar Supabase Storage'a taşındı, yüklemede otomatik küçültme, kullanılmayan fotoğrafların otomatik temizliği; kullanılmayan `fams` alanı kaldırıldı |
 | **5.0** | **Büyük kararlılık sürümü.** Çoklu eş düzenlemede artık kaybolmuyor · GED/JSON/demo yüklemeden önce onay · JSON yedeği geri yükleme · bulut hata ve çakışma bildirimi · Türkçe büyük harf düzeltmesi (İbrahim) · tüm tarih biçimleri tek kalıba · retina/mobil net çizim · tek tıkla kart açma · düğüm konumları otomatik kayıt · soy döngüsü koruması · kuşak sayısı istatistiği · XSS koruması |
