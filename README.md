@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-6.2.1-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-6.2.2-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -35,7 +35,7 @@ Kurulum yok, hesap açma zorunluluğu yok. Bağlantıyı açtığınız anda ça
 | Adım | Ne yapılır |
 |:---:|---|
 | **1** | [Uygulamayı aç](https://kamilsaim.github.io/soyagaci/) → Google ile giriş yap veya **Yerel olarak kullan**'a tıkla |
-| **2** | **+ Kişi** ile ilk kişiyi ekle — ya da elinizde `.ged` dosyası varsa **GED Yükle** ile hepsini birden aktar |
+| **2** | **+ Kişi** ile ilk kişiyi ekle — ya da elinizde `.ged` dosyası varsa **ℹ️ Bilgi → Veri İşlemleri**'nden hepsini birden aktar |
 | **3** | Formdaki **Anne / Baba / Eşler / Çocuklar** alanlarından bağlantıları kur. Kişi listede yoksa **➕ Yeni … Ekle** ile aynı ekrandan oluştur |
 | **4** | **🌳 Ağaç** sekmesinde **🎯 Odak** ile bir kişinin çevresini, **Tüm Ağaç** ile bütün aileyi gez |
 | **5** | **⚙️ Ayarlar → JSON Yedek Al** ile düzenli yedek al |
@@ -88,7 +88,7 @@ Vefat tarihi bilinmeyenler için kişi formunda **"Vefat etti (tarihi bilinmiyor
 ### 📁 İçe / dışa aktarma
 - **GEDCOM 5.5.1** — MyHeritage, Ancestry ve benzeri programlarla iki yönlü uyum. Dışa aktarımda `FAMC`/`FAMS` işaretçileri, kızlık soyadı ve standart tarih biçimi yazılır.
 - **JSON yedek** — tüm kişileri, bağlantıları ve fotoğraf referanslarını içerir; aynı butonla geri yüklenir. Bulut fotoğraflarının kendisi ayrı depoda durur, yedek dosyasında yalnızca bağlantıları bulunur (yani yedek aynı hesapta geri yüklenmelidir).
-- **e-Devlet Alt-Üst Soy belgesi** — [e-Devlet Soyağacı → GEDCOM](https://kamilsaim.github.io/edevlet-ged/) dönüştürücüsüyle `.ged` dosyasına çevirip **GED Yükle** ile açın.
+- **e-Devlet Alt-Üst Soy belgesi** — [e-Devlet Soyağacı → GEDCOM](https://kamilsaim.github.io/edevlet-ged/) dönüştürücüsüyle `.ged` dosyasına çevirip **Bilgi → Veri İşlemleri**'nden yükleyin.
 - Üzerine yazacak her içe aktarma işlemi önce onay sorar.
 
 ### ☁️ Güvenli senkronizasyon
@@ -124,6 +124,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **6.2.2** | Telefonda üst başlığın taşıp sayfayı sola kaydırması düzeltildi (GED yükleme Bilgi sekmesinde) |
 | **6.2.1** | Telefonda ana ekrana eklenerek kullanıldığında üst başlığın saat/çentik bölgesine taşması düzeltildi · aşağı çekince sayfanın esnemesi kapatıldı |
 | **6.2** | **Hatırlatmalar:** açılışta yaklaşan doğum günü ve yıl dönümü uyarısı · ay ay gezilebilen takvim · Ayarlar'da hatırlatma seçimi ve "kaç gün önce" · 01/07 yer tutucu tarihler hatırlatılmaz |
 | **6.1** | **Akrabalık hesaplayıcı** (amca, dayı, hala, teyze, yeğen, kuzen, yenge, enişte, kayınpeder, görümce, elti, bacanak…) ve "Ben kimim?" · "vefat etti, tarihi bilinmiyor" işareti (e-Devlet'teki tarihsiz ölüm kayıtları artık kaybolmuyor) · mükerrer kişi bulma ve birleştirme · yaklaşan doğum günü ve anma günleri · ağaçta arama, geri butonu ve yazdırma · doğum yerleri haritası |
