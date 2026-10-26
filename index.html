@@ -73,6 +73,23 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 #ttb{display:flex;gap:7px;align-items:center;padding:10px 14px;background:var(--surface);border-bottom:1.5px solid var(--border);flex-wrap:wrap;flex-shrink:0}
 #tc{flex:1;cursor:grab;display:block;background:var(--bg);touch-action:none;min-height:0}
 #tc.dg{cursor:grabbing}
+.tsearch{position:relative;flex:1;min-width:120px}.tsearch input{width:100%;padding:6px 9px;font-size:.8rem}
+#tSRes{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);box-shadow:0 8px 24px var(--shadow);z-index:60;max-height:320px;overflow:auto;display:none}
+#tSRes div{padding:8px 11px;font-size:.8rem;cursor:pointer;border-bottom:1px solid var(--border)}#tSRes div:last-child{border-bottom:none}
+#tSRes div.on,#tSRes div:hover{background:var(--surface2)}#tSRes small{color:var(--text3);float:right}#tSRes i{color:var(--text3);font-size:.72rem}#tSRes .none{color:var(--text3);cursor:default}
+.remind{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:12px}
+.remind-h{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:.8rem;color:var(--accent);margin-bottom:4px}
+.remind-h button{border:none;background:none;font-size:1.1rem;color:var(--text3);cursor:pointer;padding:0 4px}
+.remind-i{font-size:.8rem;padding:5px 0;cursor:pointer;border-top:1px solid var(--border)}.remind-i span{color:var(--text3)}.remind-more{font-size:.72rem;color:var(--text3);padding-top:4px}
+.kin-line{font-size:.78rem;color:var(--accent);margin-top:3px;font-weight:600}
+.kin-res{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);padding:12px;min-height:48px}
+.kin-big{font-size:1rem;font-weight:700;color:var(--text)}.kin-sub{font-size:.75rem;color:var(--text3);margin-top:4px}
+.dup-row{border:1.5px solid var(--border);border-radius:var(--rs);padding:8px;margin-bottom:8px;background:var(--surface2)}
+.dup-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dup-p{font-size:.76rem;color:var(--text2);cursor:pointer;min-width:0}.dup-p b{color:var(--text)}
+.dup-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#bpMap{display:none;height:380px;border-radius:var(--r);border:1.5px solid var(--border);margin-top:8px;z-index:0}
+#printArea{display:none}
+@media print{body.printing>*:not(#printArea){display:none!important}body.printing #printArea{display:block!important}#printArea h1{font-family:'Playfair Display',serif;font-size:20pt;color:#c8855a;margin:0}#printArea .pa-sub{font-size:10pt;color:#7a6457;margin-bottom:6mm}#printArea img{width:100%;height:auto}@page{size:landscape;margin:10mm}}
 .seg{display:inline-flex;border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;flex-shrink:0}
 .seg button{border:none;background:transparent;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:.74rem;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
 .seg button.on{background:var(--accent);color:#fff}
@@ -285,6 +302,7 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- LIST -->
 <div class="panel active" id="listPanel">
+  <div id="remind"></div>
   <div class="si">
     <input type="search" id="srch" placeholder="🔍 Kişi ara..." oninput="renderList()">
     <button class="btn bg bs" onclick="toggleBulk()">☑️ Seç</button>
@@ -310,7 +328,8 @@ textarea{resize:vertical;min-height:65px}
 <div class="panel" id="treePanel" style="height:calc(100vh - 112px);position:relative">
   <div id="ttb">
     <div class="seg" id="tMode"><button data-m="focus" onclick="setTreeMode('focus')">🎯 Odak</button><button data-m="full" onclick="setTreeMode('full')">🌳 Tüm Ağaç</button></div>
-    <select id="focSel" onchange="focusPerson(this.value)" style="flex:1;min-width:110px;padding:6px 9px;font-size:.8rem"><option value="">— Kişi seç —</option></select>
+    <button class="btn bg bs" id="tBack" onclick="focusBack()" title="Geri">←</button>
+    <div class="tsearch"><input id="tSearch" type="search" placeholder="🔍 Kişi ara…" autocomplete="off" oninput="tSearchInput()" onfocus="this.select();tSearchInput()" onblur="tSearchBlur()" onkeydown="tSearchKey(event)"><div id="tSRes"></div></div>
     <span class="tgen" id="tGen" title="Gösterilecek kuşak sayısı (yukarı / aşağı)">⬆<select id="upSel" onchange="setGen()"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option></select>⬇<select id="dnSel" onchange="setGen()"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option></select></span>
     <button class="btn bg bs" onclick="zoomBy(-.15)" title="Uzaklaş">−</button>
     <button class="btn bg bs" onclick="zoomBy(.15)" title="Yakınlaş">+</button>
@@ -318,13 +337,19 @@ textarea{resize:vertical;min-height:65px}
     <button class="btn bg bs" onclick="resetView()" title="Başa dön">⌂</button>
     <button class="btn bg bs" id="tReset" title="Düzeni Sıfırla" onclick="resetLayout()">↺</button>
     <button class="btn bg bs" onclick="exportTreePNG()" title="Ağacı resim olarak indir">📷</button>
+    <button class="btn bg bs" onclick="printTree()" title="Yazdır / PDF">🖨</button>
   </div>
   <canvas id="tc"></canvas>
   <div id="th">🖐 Sürükle · Tık = Kart Aç · Uzun bas → düğümü taşı (otomatik kaydedilir)</div>
 </div>
 
 <!-- STATS -->
-<div class="panel" id="statsPanel"><div id="stCont"></div></div>
+<div class="panel" id="statsPanel"><div id="stCont"></div>
+  <div class="cbw"><div class="cbt">📍 Doğum Yerleri Haritası</div>
+    <button class="btn bg bs" id="bpBtn" onclick="showBirthMap()">🗺️ Haritayı göster</button>
+    <div id="bpMap"></div><div id="bpInfo" style="font-size:.72rem;color:var(--text3);margin-top:6px">Yer adları (kişi bilgisi değil) konum bulmak için OpenStreetMap'e gönderilir ve bu cihazda saklanır.</div>
+  </div>
+</div>
 
 <!-- SETTINGS -->
 <div class="panel" id="settingsPanel">
@@ -333,6 +358,16 @@ textarea{resize:vertical;min-height:65px}
     <p style="font-size:.8rem;color:var(--text2);margin-bottom:12px">Tüm doğum ve ölüm tarihlerini tek biçime getirir: <strong style="color:var(--text)">30 JUL 2003</strong>, <strong style="color:var(--text)">30.07.2003</strong> ve <strong style="color:var(--text)">30-07-2003</strong> → <strong style="color:var(--text)">30/07/2003</strong>. Doğum günü hatırlatmalarının çalışması için tarihlerin bu biçimde olması gerekir.</p>
     <div id="dateConvResult" style="font-size:.8rem;color:var(--text2);margin-bottom:10px;display:none"></div>
     <button class="btn bp" onclick="fixDates()">📅 Tarihleri Dönüştür</button>
+  </div>
+  <div class="settings-section">
+    <h4>👤 Ben Kimim?</h4>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px">Kendinizi seçin; kişi kartlarında o kişinin size ne olduğu (amcanız, yeğeniniz…) yazar. Bu seçim yalnızca bu cihazda saklanır.</p>
+    <select id="meSel" onchange="setMe(this.value)" style="width:100%"></select>
+  </div>
+  <div class="settings-section">
+    <h4>👥 Mükerrer Kişi Kontrolü</h4>
+    <p style="font-size:.8rem;color:var(--text2);margin-bottom:10px">Aynı kişinin iki kez girilmiş olabileceği kayıtlar (aynı ad, uyumlu soyad ve doğum yılı, anne-baba adları çelişmiyor). Birleştirince boş alanlar doldurulur, eşler, çocuklar ve fotoğraflar tek kayıtta toplanır.</p>
+    <div id="dupList"></div>
   </div>
   <div class="settings-section">
     <h4>🔍 Eksik Veri Raporu</h4>
@@ -353,12 +388,13 @@ textarea{resize:vertical;min-height:65px}
 <div class="panel" id="infoPanel">
   <div class="info-card" style="text-align:center">
     <img src="data:image/jpeg;base64,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" alt="logo" style="width:80px;height:80px;margin-bottom:8px;border-radius:20px">
-    <h4>Soy Ağacı Uygulaması <span class="ver-badge">v6.0</span></h4>
+    <h4>Soy Ağacı Uygulaması <span class="ver-badge">v6.1</span></h4>
     <p>Kişisel soy ağacınızı oluşturmak, düzenlemek ve görselleştirmek için geliştirilmiş tek dosya HTML uygulaması. Google hesabınızla giriş yaparak verilerinizi bulutta saklayabilir ya da çevrimdışı yerel olarak kullanabilirsiniz. Uygulama güncellendiğinde otomatik yenilenir.</p>
   </div>
   <div class="info-card">
     <h4>📋 Sürüm Geçmişi</h4>
     <ul>
+      <li><strong>v6.1</strong> — 🔗 <strong>Akrabalık hesaplayıcı</strong> (amca, dayı, hala, teyze, yeğen, kuzen, yenge, enişte, kayınpeder, baldız, görümce, elti, bacanak…) ve Ayarlar'da "Ben kimim?" seçimi; 🕊️ "Vefat etti (tarihi bilinmiyor)" işareti (e-Devlet'teki tarihsiz ölüm kayıtları artık kaybolmuyor); 👥 mükerrer kişi bulma ve birleştirme; 📅 Liste'de yaklaşan doğum günü ve anma günleri; ağaçta arama kutusu, ← geri butonu ve 🖨 yazdırma; 📍 doğum yerleri haritası.</li>
       <li><strong>v6.0</strong> — <strong>Yeni ağaç görünümü ve yeni logo.</strong> 🎯 Odak görünümü: seçtiğiniz kişi ortada, üstte ataları, yanında eşi ve kardeşleri, altta çocukları ve torunları; bir karta dokununca ağaç o kişiye kayar. 🌳 Tüm Ağaç baştan düzenlendi: çocuklar hangi evlilikten olduklarına göre gruplanıyor, seçilen kişinin soy hattı vurgulanıyor. Yeni yatay kartlar, evlilik rozetleri (♥ 💔 🕊 🤝), kuşak etiketleri, ağacı resim (PNG) olarak indirme ve kişi kartında “🌳 Ağaçta” butonu.</li>
       <li><strong>v5.2</strong> — Çok cihazlı kullanımda eşitleme düzeltmeleri (değişiklikler artık başka cihazın verisini ezmiyor), GEDCOM içe aktarmada kızlık soyadı ve çok satırlı notlar korunuyor, güvenlik sıkılaştırmaları.</li>
       <li><strong>v5.1</strong> — Fotoğraflar artık buluttaki özel deponuzda (Supabase Storage) saklanıyor; yüklenirken otomatik küçültülüyor. Böylece ağaç verisi küçük ve hızlı kalıyor, tarayıcı depolama sınırı sorunu ortadan kalkıyor. Kullanılmayan fotoğraflar kendiliğinden siliniyor.</li>
@@ -444,6 +480,7 @@ textarea{resize:vertical;min-height:65px}
     <div class="fgp"><label>Doğum Yeri</label><input id="f_bp" placeholder="Şehir, Ülke" oninput="autoCap(this)"></div>
     <div class="fgp"><label>Ölüm Tarihi</label><input id="f_dd" placeholder="GG/AA/YYYY veya YYYY"></div>
     <div class="fgp"><label>Ölüm Yeri</label><input id="f_dp" placeholder="Şehir, Ülke" oninput="autoCap(this)"></div>
+    <div class="fgp full"><label style="display:flex;align-items:center;gap:7px;cursor:pointer;text-transform:none"><input type="checkbox" id="f_dc" style="width:auto;margin:0"> 🕊️ Vefat etti (tarihi bilinmiyor)</label></div>
     <div class="fgp full"><label>Meslek</label><input id="f_oc" placeholder="Meslek" oninput="autoCap(this)"></div>
     <div class="fgp full" id="maidenRow" style="display:none"><label>Kızlık Soyadı</label><input id="f_ms" placeholder="Evlenmeden önceki soyad" oninput="autoCap(this)"></div>
   </div>
@@ -555,6 +592,12 @@ textarea{resize:vertical;min-height:65px}
   <div class="md" onclick="event.stopPropagation()" id="detCont"></div>
 </div>
 
+<!-- MODAL: AKRABALIK -->
+<div class="mo" id="kinModal" style="display:none;z-index:250" onclick="cModal('kinModal')">
+  <div class="md" onclick="event.stopPropagation()" id="kinCont" style="width:min(440px,100%)"></div>
+</div>
+<div id="printArea"></div>
+
 <!-- MODAL: CONFIRM -->
 <div class="mo" id="confirmModal" style="display:none;z-index:300">
   <div class="md" style="width:min(360px,100%);text-align:center;padding:22px 18px" onclick="event.stopPropagation()">
@@ -588,7 +631,7 @@ let supaUser=null,saveTimer=null;
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
-const APP_VER='6.0';
+const APP_VER='6.1';
 (function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.replace(location.origin+location.pathname+'?v='+APP_VER+location.hash);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},nextId=1;
 let filt='all',bulkMode=false,selIds=new Set();
@@ -837,6 +880,7 @@ function migrateData(){
     if(!Array.isArray(p.gallery))p.gallery=[];
     if(!p.maidenName)p.maidenName='';
     if(!p.maritalStatus)p.maritalStatus='married';
+    if(typeof p.deceased!=='boolean')p.deceased=false;
     if(!Array.isArray(p.spouses))p.spouses=p.spouse?[{id:p.spouse,status:p.maritalStatus}]:[];
     p.spouses=p.spouses.filter(s=>s&&typeof s==='object'&&s.id);
     if(!Array.isArray(p.children))p.children=[];
@@ -970,6 +1014,7 @@ function parseGED(txt){
       if(lv===2&&tag==='NOTE'&&t==='CONC')cur.no=(cur.no||'')+v;
       if(lv===2&&tag==='BIRT'&&t==='DATE')cur.bd=v;
       if(lv===2&&tag==='BIRT'&&t==='PLAC')cur.bp=v;
+      if(lv===1&&t==='DEAT')cur.dead=true;   // "1 DEAT Y": vefat etti, tarihi yok
       if(lv===2&&tag==='DEAT'&&t==='DATE')cur.dd=v;
       if(lv===2&&tag==='DEAT'&&t==='PLAC')cur.dp=v;
       if(lv===1&&!['BIRT','DEAT','OCCU','NOTE'].includes(t))tag=null;
@@ -987,7 +1032,7 @@ function parseGED(txt){
   for(const[gid,src]of Object.entries(tP)){
     const pid=im[gid];
     people[pid]={id:pid,firstName:capStr(src.fn||''),lastName:capStr(src.ln||''),gender:src.gn||'M',
-      birthDate:normDate(src.bd||''),birthPlace:capStr(src.bp||''),deathDate:normDate(src.dd||''),deathPlace:capStr(src.dp||''),
+      birthDate:normDate(src.bd||''),birthPlace:capStr(src.bp||''),deathDate:normDate(src.dd||''),deathPlace:capStr(src.dp||''),deceased:!!src.dead,
       occupation:capStr(src.oc||''),notes:(src.no||'').trim(),maidenName:src.gn==='F'?capStr(src.mn||''):'',maritalStatus:'married',
       photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
   }
@@ -1049,7 +1094,7 @@ function switchTab(t){
   document.getElementById('tab-'+t).classList.add('active');
   if(t==='stats')renderStats();
   if(t==='tree'){resizeCanvas();buildTree();schedHide();if(!_treeCamSet){_treeCamSet=true;treeHome();}}
-  if(t==='settings')renderMissing();
+  if(t==='settings'){renderMissing();renderDupes();renderMeSel();}
 }
 
 // ══════════════════════════════════════
@@ -1063,8 +1108,8 @@ function getFilt(){
     if(q&&!n.includes(q))return false;
     if(filt==='male'&&p.gender!=='M')return false;
     if(filt==='female'&&p.gender!=='F')return false;
-    if(filt==='living'&&p.deathDate)return false;
-    if(filt==='deceased'&&!p.deathDate)return false;
+    if(filt==='living'&&isDead(p))return false;
+    if(filt==='deceased'&&!isDead(p))return false;
     return true;
   }).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName,'tr'));
 }
@@ -1080,7 +1125,7 @@ function renderList(){
     const em=p.gender==='M'?'👨':'👩';
     const nm=esc(pname(p));
     const maiden=p.maidenName&&p.gender==='F'?` <span style="font-size:.73rem;color:var(--text3);font-weight:400">(d.${esc(p.maidenName)})</span>`:'';
-    const dt=esc([p.birthDate,p.deathDate?p.deathDate:''].filter(Boolean).join(' — '));
+    const dt=esc([p.birthDate,p.deathDate||(isDead(p)?'🕊️':'')].filter(Boolean).join(' — '));
     const gc=(p.gallery||[]).length;
     const chk=selIds.has(p.id);
     const isDivorced=(p.spouses||[]).some(s=>s.status==='divorced');
@@ -1279,6 +1324,7 @@ function openForm(id){
     document.getElementById('f_bp').value=p.birthPlace||'';
     document.getElementById('f_dd').value=p.deathDate||'';
     document.getElementById('f_dp').value=p.deathPlace||'';
+    document.getElementById('f_dc').checked=!!p.deceased;
     document.getElementById('f_oc').value=p.occupation||'';
     document.getElementById('f_ms').value=p.maidenName||'';
     document.getElementById('f_no').value=p.notes||'';
@@ -1291,6 +1337,7 @@ function openForm(id){
     mainPhoto?showMain(photoSrc(mainPhoto)):hideMain();
   } else {
     ['f_fn','f_ln','f_bd','f_bp','f_dd','f_dp','f_oc','f_ms','f_no'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('f_dc').checked=false;
     setG('M');hideMain();
     ['f_mo','f_fa'].forEach(s=>document.getElementById(s).value='');
   }
@@ -1356,6 +1403,7 @@ function savePerson(){
     birthPlace:capStr(document.getElementById('f_bp').value.trim()),
     deathDate:normDate(document.getElementById('f_dd').value.trim()),
     deathPlace:capStr(document.getElementById('f_dp').value.trim()),
+    deceased:document.getElementById('f_dc').checked,
     occupation:capStr(document.getElementById('f_oc').value.trim()),
     maidenName:g==='F'?capStr(document.getElementById('f_ms').value.trim()):'',
     notes:document.getElementById('f_no').value.trim(),
@@ -1423,7 +1471,9 @@ function openDetail(id){
   const by=yearOf(p.birthDate),dy=yearOf(p.deathDate);
   let ageStr='';
   if(by&&dy)ageStr=`${+dy-+by} yıl yaşadı`;
-  else if(by)ageStr=`${new Date().getFullYear()-+by} yaşında`;
+  else if(by&&!isDead(p))ageStr=`${new Date().getFullYear()-+by} yaşında`;
+  else if(isDead(p)&&!dy)ageStr='🕊️ Vefat etti';
+  const me=getMe(),kin=me&&me!==id?kinPhrase(me,id):null;
 
   function chip(rid,lbl){
     if(!rid||!people[rid])return'';
@@ -1455,6 +1505,7 @@ function openDetail(id){
         ${p.maidenName&&p.gender==='F'?`<div class="ds" style="font-style:italic">d. ${esc(p.maidenName)}</div>`:''}
         <div class="ds">${p.gender==='M'?'Erkek':'Kadın'}${p.occupation?' · '+esc(p.occupation):''}</div>
         ${ageStr?`<div style="font-size:.72rem;color:var(--accent);margin-top:2px">⏳ ${ageStr}</div>`:''}
+        ${kin?`<div class="kin-line">🔗 ${esc(kin)}</div>`:''}
         ${gals.length?`<div style="font-size:.72rem;color:var(--text3);margin-top:2px">🖼️ ${gals.length} fotoğraf</div>`:''}
       </div>
     </div>
@@ -1462,7 +1513,7 @@ function openDetail(id){
     <div class="ig">
       <div class="ii"><div class="il">Doğum</div><div class="iv">${esc(p.birthDate)||'—'}</div></div>
       <div class="ii"><div class="il">Doğum Yeri</div><div class="iv">${esc(p.birthPlace)||'—'}</div></div>
-      <div class="ii"><div class="il">Ölüm</div><div class="iv">${esc(p.deathDate)||'—'}</div></div>
+      <div class="ii"><div class="il">Ölüm</div><div class="iv">${esc(p.deathDate)||(p.deceased?'Tarihi bilinmiyor':'—')}</div></div>
       <div class="ii"><div class="il">Ölüm Yeri</div><div class="iv">${esc(p.deathPlace)||'—'}</div></div>
       ${p.notes?`<div class="ii full"><div class="il">Notlar</div><div class="iv" style="font-weight:400;white-space:pre-wrap">${esc(p.notes)}</div></div>`:''}
     </div>
@@ -1475,6 +1526,7 @@ function openDetail(id){
     <div class="ma">
       <button class="btn bg" onclick="cModal('detModal')">Kapat</button>
       <button class="btn bg" onclick="showInTree('${id}')">🌳 Ağaçta</button>
+      <button class="btn bg" onclick="openKin(getMe()||'${id}','${id}')">🔗 Akrabalık</button>
       <button class="btn bg" onclick="cModal('detModal');setTimeout(()=>openForm('${id}'),100)">✏️ Düzenle</button>
       <button class="btn bd" onclick="cfmDel('${id}')">🗑️ Sil</button>
     </div>`;
@@ -1559,7 +1611,7 @@ let CW=0,CH=0,DPR=1,_layoutTimer=null;
 let camDrag=false,cdSX=0,cdSY=0,camSX=0,camSY=0;
 let ndDrag=false,ndId=null,ndSX=0,ndSY=0,ndOX=0,ndOY=0,ndMoved=false;
 let lastTap=0,longPressTimer=null;
-let _animTok=0,treeMode='focus',focusId=null,upGen=3,downGen=2,hlSet=null,_anim=null,_exporting=false,_treeCamSet=false;
+let _animTok=0,_fBackNav=false,treeMode='focus',focusId=null,upGen=3,downGen=2,hlSet=null,_anim=null,_exporting=false,_treeCamSet=false;
 try{
   const m=localStorage.getItem('sa4_tmode');if(m==='full'||m==='focus')treeMode=m;
   focusId=localStorage.getItem('sa4_tfoc')||null;
@@ -1940,7 +1992,7 @@ function fitText(t,mw){if(ctx.measureText(t).width<=mw)return t;while(t.length>1
 function drawNode(p,x,y){
   const c=COL[p.gender]||COL.M;
   const isd=ndDrag&&ndId===p.id,isf=treeMode==='focus'&&p.id===focusId,ishl=hlSet&&hlSet._root===p.id;
-  const dead=!!p.deathDate;
+  const dead=isDead(p);
   // Gölge + kart
   ctx.shadowColor=isf||ishl?'rgba(200,133,90,.45)':isd?'rgba(80,50,30,.35)':'rgba(80,50,30,.13)';
   ctx.shadowBlur=isf||ishl?18:isd?16:8;ctx.shadowOffsetY=isd?6:2;
@@ -1975,7 +2027,7 @@ function drawNode(p,x,y){
   let yt='';
   if(by&&dy)yt=`${by} – ${dy} · ${+dy-+by} yıl`;
   else if(dy)yt=`ö. ${dy}`;
-  else if(by){const ag=new Date().getFullYear()-+by;yt=ag<=110?`${by} · ${ag} yaş`:`d. ${by}`;}
+  else if(by)yt=dead?`${by} – ?`:`${by} · ${new Date().getFullYear()-+by} yaş`;
   if(yt){ctx.fillStyle='#b0967e';ctx.font='600 9.5px Nunito,sans-serif';ctx.fillText(fitText(yt,mw),tx,y+(ln?50:36));}
   // Rozetler: galeri ve çocuk sayısı
   const badge=(bx,by2,txt,col)=>{ctx.font='bold 8px Nunito,sans-serif';const w=Math.max(15,ctx.measureText(txt).width+8);roundRect(bx-w,by2-7,w,14,7);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,bx-w/2,by2+.5);};
@@ -2038,6 +2090,7 @@ function resetLayout(){const old=nodeDrag['$old'];nodeDrag={'$v':2};if(old)nodeD
 function setFocus(id,animate){
   if(!id||!people[id])return;
   const from={};Object.keys(nodePos).forEach(q=>{from[q]=effPos(q);});
+  if(focusId&&focusId!==id&&!_fBackNav){_fHist.push(focusId);if(_fHist.length>50)_fHist.shift();}
   focusId=id;try{localStorage.setItem('sa4_tfoc',id);}catch(e){}
   computeLayout();updateTreeUI();
   // Eski ve yeni yerleşimde konumu farklı ölçeklerde olabilir: kamera yeni kişiyi ortalar
@@ -2095,14 +2148,15 @@ function updateTreeUI(){
   const u=document.getElementById('upSel'),d=document.getElementById('dnSel');if(u)u.value=upGen;if(d)d.value=downGen;
   const h=document.getElementById('th');
   if(h)h.textContent=treeMode==='focus'?'👆 Karta dokun = o kişiye geç · Ortadaki karta dokun = bilgi kartı · Uzun bas = bilgi kartı':'🖐 Sürükle · Tık = Kart Aç · Uzun bas → düğümü taşı (otomatik kaydedilir)';
-  const sel=document.getElementById('focSel');
-  if(sel){const want=treeMode==='focus'?(focusId||''):(hlSet?hlSet._root:'');if(sel.value!==want)sel.value=want;}
+  const inp=document.getElementById('tSearch');
+  if(inp&&document.activeElement!==inp){const w=treeMode==='focus'?focusId:(hlSet?hlSet._root:null);inp.value=w&&people[w]?pname(people[w]):'';}
+  const bk=document.getElementById('tBack');if(bk){bk.style.display=treeMode==='focus'?'':'none';bk.disabled=!_fHist.length;bk.style.opacity=_fHist.length?1:.4;}
 }
 
 // silent=true iken kullanıcıya toast gösterilmez (otomatik kayıtlarda)
 function saveLayout(silent){
   nodeDrag['$v']=2;
-  try{localStorage.setItem('sa4nd',JSON.stringify(nodeDrag));}catch(e){console.warn(e);}
+  try{localStorage.setItem(userKey('sa4nd'),JSON.stringify(nodeDrag));}catch(e){console.warn(e);}
   if(supaUser){
     supa.from('soy_node_positions').upsert({user_id:supaUser.id,positions:nodeDrag},{onConflict:'user_id'})
       .then(({error})=>{
@@ -2124,14 +2178,16 @@ async function loadLayout(){
   if(supaUser){
     try{const {data}=await supa.from('soy_node_positions').select('positions').eq('user_id',supaUser.id).single();if(data){nodeDrag=normDrag(data.positions);return;}}catch(e){}
   }
-  try{const d=localStorage.getItem('sa4nd');nodeDrag=normDrag(d?JSON.parse(d):null);}catch(e){}
+  // Eski ortak 'sa4nd' anahtarı yalnızca kullanıcıya özel kayıt yoksa okunur
+  try{const d=localStorage.getItem(userKey('sa4nd'))||localStorage.getItem('sa4nd');nodeDrag=normDrag(d?JSON.parse(d):null);}catch(e){}
 }
 
 // Ağacın tamamını (görünen hâliyle) PNG olarak indirir
-function exportTreePNG(){
-  const b=layoutBounds();if(!b){toast('Ağaç boş');return;}
+// Görünen ağacı ekran dışı bir canvas'a çizer (en uzun kenar ≤ maxPx, ≤16 MP)
+function renderTreeCanvas(maxPx){
+  const b=layoutBounds();if(!b)return null;
   const pad=40,w=b.maxX-b.minX+pad*2,h=b.maxY-b.minY+pad*2;
-  const s=Math.min(2,9000/Math.max(w,h),Math.sqrt(16e6/(w*h)));
+  const s=Math.min(2,maxPx/Math.max(w,h),Math.sqrt(16e6/(w*h)));
   const off=document.createElement('canvas');off.width=Math.ceil(w*s);off.height=Math.ceil(h*s);
   const sv={ctx,camX,camY,sc,CW,CH,DPR,_anim};
   ctx=off.getContext('2d');CW=off.width;CH=off.height;DPR=1;sc=s;camX=(pad-b.minX)*s;camY=(pad-b.minY)*s;_anim=null;_exporting=true;
@@ -2141,13 +2197,17 @@ function exportTreePNG(){
   } finally {
     ({ctx,camX,camY,sc,CW,CH,DPR,_anim}=sv);_exporting=false;
   }
+  drawTree();
+  return off;
+}
+function exportTreePNG(){
+  const off=renderTreeCanvas(9000);if(!off){toast('Ağaç boş');return;}
   try{
     off.toBlob(bl=>{
       if(!bl){toast('⚠️ Görüntü oluşturulamadı');return;}
       dl(`soy-agaci-${new Date().toISOString().slice(0,10)}.png`,bl,'image/png');toast('📷 Ağaç görüntüsü indirildi');
     },'image/png');
   }catch(e){console.error(e);toast('⚠️ Fotoğraflar yüzünden görüntü oluşturulamadı');}
-  drawTree();
 }
 
 function buildTree(){
@@ -2157,10 +2217,7 @@ function buildTree(){
   drawTree();
 }
 function updateFocSel(){
-  const sel=document.getElementById('focSel');
-  sel.innerHTML='<option value="">— Kişi seç —</option>'+
-    Object.values(people).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName,'tr'))
-      .map(p=>`<option value="${esc(p.id)}">${esc(pname(p))}</option>`).join('');
+  updateTreeUI();
 }
 function hitTest(cx,cy){
   const rect=canvas.getBoundingClientRect();
@@ -2267,7 +2324,7 @@ function renderStats(){
   const pl=Object.values(people);
   if(!pl.length){document.getElementById('stCont').innerHTML=`<div class="es"><div class="ei">📊</div><h3>Veri yok</h3><p>Önce kişi ekleyin.</p></div>`;return;}
   const total=pl.length,males=pl.filter(p=>p.gender==='M').length,females=pl.filter(p=>p.gender==='F').length;
-  const living=pl.filter(p=>!p.deathDate).length;
+  const living=pl.filter(p=>!isDead(p)).length;
   const withPhoto=pl.filter(p=>p.photo).length,totPh=pl.reduce((s,p)=>s+(p.gallery||[]).length,0);
   const nowY=new Date().getFullYear();
   const aged=pl.map(p=>{
@@ -2307,7 +2364,7 @@ function renderStats(){
   const today=new Date();
   const todayMid=new Date(today.getFullYear(),today.getMonth(),today.getDate());
   // Tarih ayıracı nokta, tire veya bölü olabilir
-  const upcomingBD=pl.filter(p=>!p.deathDate&&p.birthDate).map(p=>{
+  const upcomingBD=pl.filter(p=>!isDead(p)&&p.birthDate).map(p=>{
     const m=String(p.birthDate).trim().match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})$/);
     if(!m)return null;
     const d=+m[1],mo=+m[2],yr=+m[3];
@@ -2394,6 +2451,7 @@ function expGED(){
     if(p.gender)out+=`1 SEX ${p.gender}\n`;
     if(p.birthDate||p.birthPlace){out+='1 BIRT\n';if(p.birthDate)out+=`2 DATE ${toGedDate(p.birthDate)}\n`;if(p.birthPlace)out+=`2 PLAC ${p.birthPlace}\n`;}
     if(p.deathDate||p.deathPlace){out+='1 DEAT\n';if(p.deathDate)out+=`2 DATE ${toGedDate(p.deathDate)}\n`;if(p.deathPlace)out+=`2 PLAC ${p.deathPlace}\n`;}
+    else if(p.deceased)out+='1 DEAT Y\n';
     if(p.occupation)out+=`1 OCCU ${p.occupation}\n`;
     if(p.notes)String(p.notes).split(/\r?\n/).forEach((ln,i)=>{out+=(i===0?'1 NOTE ':'2 CONT ')+ln+'\n';});
     (famcOf[p.id]||[]).forEach(fid=>out+=`1 FAMC @${fid}@\n`);
@@ -2516,7 +2574,384 @@ function _confirmResolve(v){
   if(_confirmResolveFn){_confirmResolveFn(v);_confirmResolveFn=null;}
 }
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2700);}
-function renderAll(){renderList();updateFocSel();if(document.getElementById('statsPanel').classList.contains('active'))renderStats();if(document.getElementById('settingsPanel').classList.contains('active'))renderMissing();}
+// ══════════════════════════════════════
+//  v6.1 — VEFAT · AKRABALIK · MÜKERRER · HATIRLATMA · YAZDIR · HARİTA
+// ══════════════════════════════════════
+// Vefat: tarih, yer ya da "tarihi bilinmiyor" işareti; 110 yaşını aşmış kayıtlar da vefat sayılır
+function isDead(p){
+  if(!p)return false;
+  if(p.deathDate||p.deathPlace||p.deceased)return true;
+  const by=yearOf(p.birthDate);return !!by&&new Date().getFullYear()-+by>110;
+}
+// Anahtarlar kullanıcıya göre ayrılır (aynı cihazda farklı hesaplar karışmasın)
+function userKey(base){return base+'_'+(supaUser?supaUser.id:'local');}
+function getMe(){try{const m=localStorage.getItem(userKey('sa4_me'));return m&&people[m]?m:null;}catch(e){return null;}}
+function setMe(id){try{if(id)localStorage.setItem(userKey('sa4_me'),id);else localStorage.removeItem(userKey('sa4_me'));}catch(e){}renderMeSel();toast(id?'👤 '+pname(people[id])+' "ben" olarak ayarlandı':'👤 "Ben" seçimi kaldırıldı');}
+function renderMeSel(){
+  const s=document.getElementById('meSel');if(!s)return;
+  const me=getMe();
+  s.innerHTML='<option value="">— Seçilmedi —</option>'+Object.values(people).sort((a,b)=>pname(a).localeCompare(pname(b),'tr'))
+    .map(p=>`<option value="${esc(p.id)}"${p.id===me?' selected':''}>${esc(pname(p))}${yearOf(p.birthDate)?' · '+yearOf(p.birthDate):''}</option>`).join('');
+}
+
+// ── Akrabalık ──
+// Her kelimenin [iyelik, iyelik+tamlayan] hâli: "babası" / "babasının"
+const KW={baba:['babası','babasının'],anne:['annesi','annesinin'],dede:['dedesi','dedesinin'],babaanne:['babaannesi','babaannesinin'],anneanne:['anneannesi','anneannesinin'],
+  ogul:['oğlu','oğlunun'],kiz:['kızı','kızının'],cocuk:['çocuğu','çocuğunun'],torun:['torunu','torununun'],
+  ekardes:['erkek kardeşi','erkek kardeşinin'],kkardes:['kız kardeşi','kız kardeşinin'],abi:['ağabeyi','ağabeyinin'],abla:['ablası','ablasının'],
+  bababir:['baba bir kardeşi','baba bir kardeşinin'],annebir:['anne bir kardeşi','anne bir kardeşinin'],
+  amca:['amcası','amcasının'],hala:['halası','halasının'],dayi:['dayısı','dayısının'],teyze:['teyzesi','teyzesinin'],
+  yegen:['yeğeni','yeğeninin'],kuzen:['kuzeni','kuzeninin'],es:['eşi','eşinin'],eskies:['eski eşi','eski eşinin'],
+  kayinpeder:['kayınpederi','kayınpederinin'],kayinvalide:['kayınvalidesi','kayınvalidesinin'],kayinbirader:['kayınbiraderi','kayınbiraderinin'],
+  baldiz:['baldızı','baldızının'],gorumce:['görümcesi','görümcesinin'],gelin:['gelini','gelininin'],damat:['damadı','damadının'],
+  yenge:['yengesi','yengesinin'],eniste:['eniştesi','eniştesinin'],elti:['eltisi','eltisinin'],bacanak:['bacanağı','bacanağının'],
+  uveyanne:['üvey annesi','üvey annesinin'],uveybaba:['üvey babası','üvey babasının'],uveyogul:['üvey oğlu','üvey oğlunun'],uveykiz:['üvey kızı','üvey kızının']};
+const phrase=w=>w.map((x,i)=>KW[x][i===w.length-1?0:1]).join(' ');
+// Özel adın tamlayan eki: Kamil'in, Ayşe'nin, Mustafa'nın, Ümmügülsün'ün
+function genOf(name){
+  const n=(name||'').trim()||'Bu kişi';const lo=n.toLocaleLowerCase('tr-TR');
+  const vs=lo.match(/[aeıioöuü]/g);const lv=vs?vs[vs.length-1]:'e';
+  const h={a:'ı',ı:'ı',e:'i',i:'i',o:'u',u:'u',ö:'ü',ü:'ü'}[lv];
+  return n+"'"+(/[aeıioöuü]$/.test(lo)?'n':'')+h+'n';
+}
+const gnd=id=>people[id]&&people[id].gender==='F'?'F':'M';
+// Atalara doğru: [baba, anne, ...] → dede/babaanne/anneanne kısaltmalı kelimeler
+function upWords(ids){
+  const g=ids.map(gnd);if(!g.length)return[];
+  if(g.length===1)return[g[0]==='M'?'baba':'anne'];
+  const first=g[1]==='M'?'dede':(g[0]==='M'?'babaanne':'anneanne');
+  return[first,...g.slice(2).map(x=>x==='M'?'baba':'anne')];
+}
+// Torunlara doğru: ikişer kuşak "torun", artan tek kuşak "oğul/kız"
+function downWords(ids){
+  const w=[];let i=0;
+  while(ids.length-i>=2){w.push('torun');i+=2;}
+  if(i<ids.length)w.push(gnd(ids[i])==='M'?'ogul':'kiz');
+  return w;
+}
+function parentsOf(id){const F=parentFam[id];return F?[F.a,F.b].filter(Boolean):[];}
+// Ortak en yakın ata: {a: A'dan yukarı adım, b: B'den yukarı adım, upA:[A'nın ataları...X], downB:[X'in çocuğu...B]}
+function bloodLink(A,B){
+  if(A===B)return{a:0,b:0,upA:[],downB:[]};
+  const anc=start=>{const m=new Map([[start,{d:0,prev:null}]]),q=[start];while(q.length){const x=q.shift();parentsOf(x).forEach(p=>{if(!m.has(p)){m.set(p,{d:m.get(x).d+1,prev:x});q.push(p);}});}return m;};
+  const mA=anc(A),mB=anc(B);let best=null;
+  mA.forEach((va,x)=>{const vb=mB.get(x);if(vb&&(!best||va.d+vb.d<best.a+best.b))best={x,a:va.d,b:vb.d};});
+  if(!best)return null;
+  const chain=(m,x)=>{const r=[];let c=x;while(c!=null){r.push(c);c=m.get(c).prev;}return r;}; // X → ... → kişi
+  const upA=chain(mA,best.x).reverse().slice(1);       // A'nın ebeveyni ... X
+  const downB=chain(mB,best.x).slice(1);               // X'in çocuğu ... B
+  return{a:best.a,b:best.b,x:best.x,upA,downB};
+}
+function bloodWords(A,B,L){
+  const {a,b,upA,downB}=L,gB=gnd(B);
+  if(a===0)return downWords(downB);
+  if(b===0)return upWords(upA);
+  if(a===1&&b===1){
+    const pa=parentsOf(A),pb=parentsOf(B),full=pa.length===2&&pb.length===2&&pa.every(x=>pb.includes(x));
+    if(!full)return[gnd(L.x)==='M'?'bababir':'annebir'];
+    const ya=yearOf(people[A].birthDate),yb=yearOf(people[B].birthDate);
+    if(ya&&yb&&+yb<+ya)return[gB==='M'?'abi':'abla'];
+    return[gB==='M'?'ekardes':'kkardes'];
+  }
+  const sib=id=>gnd(id)==='M'?'ekardes':'kkardes';
+  const uncle=(parentId,id)=>gnd(parentId)==='M'?(gnd(id)==='M'?'amca':'hala'):(gnd(id)==='M'?'dayi':'teyze');
+  if(a===1)return['yegen',...downWords(downB.slice(2))];
+  if(a===2){
+    if(b===2)return['kuzen'];
+    return[uncle(upA[0],downB[0]),...downWords(downB.slice(1))];
+  }
+  return[...upWords(upA.slice(0,a-1)),sib(downB[0]),...downWords(downB.slice(1))];
+}
+function kinDetail(A,B,L){
+  // Kuzenler için "amcasının oğlu" gibi açıklama
+  if(L.b===0&&L.a===2)return gnd(L.upA[0])==='M'?'baba tarafından':'anne tarafından';
+  if(L.a===2&&L.b===2){const u=gnd(L.upA[0])==='M'?(gnd(L.downB[0])==='M'?'amca':'hala'):(gnd(L.downB[0])==='M'?'dayi':'teyze');return phrase([u,gnd(B)==='M'?'ogul':'kiz']);}
+  return'';
+}
+function spousesOf(id){return(people[id]&&people[id].spouses||[]).filter(s=>people[s.id]);}
+// Sonuç: {words:[...], note:''} ya da null
+function kinship(A,B){
+  if(!people[A]||!people[B])return null;
+  buildFamilies();
+  if(A===B)return{self:true};
+  const L=bloodLink(A,B);
+  if(L)return{words:bloodWords(A,B,L),note:kinDetail(A,B,L),common:L.x};
+  const sp=spousesOf(A).find(s=>s.id===B);
+  if(sp)return{words:[sp.status==='divorced'?'eskies':'es']};
+  const gA=gnd(A),gB=gnd(B);
+  // Eşinin akrabası
+  for(const s of spousesOf(A)){
+    const S=s.id,l=bloodLink(S,B);if(!l)continue;
+    if(l.a===1&&l.b===0)return{words:[gB==='M'?'kayinpeder':'kayinvalide']};
+    if(l.a===1&&l.b===1)return{words:[gB==='M'?'kayinbirader':(gA==='M'?'baldiz':'gorumce')]};
+    if(l.a===0&&l.b===1)return{words:[gB==='M'?'uveyogul':'uveykiz']};
+    return{words:['es',...bloodWords(S,B,l)]};
+  }
+  // Akrabasının eşi
+  for(const s of spousesOf(B)){
+    const R=s.id,l=bloodLink(A,R);if(!l)continue;
+    if(l.a===0&&l.b===1)return{words:[gB==='F'?'gelin':'damat']};
+    if((l.a===1||l.a===2)&&l.b===1)return{words:[gB==='F'?'yenge':'eniste']};
+    if(l.a===1&&l.b===0)return{words:[gB==='M'?'uveybaba':'uveyanne']};
+    return{words:[...bloodWords(A,R,l),'es']};
+  }
+  // Eşinin kardeşinin eşi: elti / bacanak
+  for(const s of spousesOf(A))for(const t of spousesOf(B)){
+    const l=bloodLink(s.id,t.id);if(!l||l.a!==1||l.b!==1)continue;
+    if(gA==='F'&&gB==='F')return{words:['elti']};
+    if(gA==='M'&&gB==='M')return{words:['bacanak']};
+    return{words:['es',gnd(t.id)==='M'?'ekardes':'kkardes','es']};
+  }
+  // Son çare: en kısa bağlantı zinciri (baba/anne/çocuk/eş)
+  const prev=new Map([[A,null]]),q=[A];
+  while(q.length&&!prev.has(B)){
+    const x=q.shift(),p=people[x];
+    const nb=[...parentsOf(x).map(y=>[y,gnd(y)==='M'?'baba':'anne']),...(famOf[x]||[]).flatMap(F=>F.kids.map(k=>[k,gnd(k)==='M'?'ogul':'kiz'])),...spousesOf(x).map(s=>[s.id,'es'])];
+    nb.forEach(([y,w])=>{if(!prev.has(y)){prev.set(y,[x,w]);q.push(y);}});
+    if(prev.size>4000)break;
+  }
+  if(!prev.has(B))return null;
+  const w=[];let c=B;while(prev.get(c)){w.unshift(prev.get(c)[1]);c=prev.get(c)[0];}
+  return{words:w,chain:true};
+}
+// Kişi kartı için: "Kamil'in dedesi (anne tarafından)"
+function kinPhrase(A,B){
+  const r=kinship(A,B);if(!r||r.self)return null;
+  return genOf(people[A].firstName)+' '+phrase(r.words)+(r.note?' ('+r.note+')':'');
+}
+function kinSentence(A,B){
+  const r=kinship(A,B);if(!r)return null;
+  if(r.self)return'Aynı kişi';
+  const s=`${people[B].firstName||'Bu kişi'}, ${genOf(people[A].firstName)} ${phrase(r.words)}`;
+  return s+(r.note?` (${r.note})`:'');
+}
+function openKin(a,b){
+  const opts=sel=>Object.values(people).sort((x,y)=>pname(x).localeCompare(pname(y),'tr')).map(p=>`<option value="${esc(p.id)}"${p.id===sel?' selected':''}>${esc(pname(p))}${yearOf(p.birthDate)?' · '+yearOf(p.birthDate):''}</option>`).join('');
+  document.getElementById('kinCont').innerHTML=`
+    <h3 style="font-family:'Playfair Display',serif;color:var(--accent);margin-bottom:10px">🔗 Akrabalık Hesapla</h3>
+    <div class="fgp full" style="margin-bottom:8px"><label>Kimin?</label><select id="kinA" onchange="calcKin()">${opts(a)}</select></div>
+    <div class="fgp full" style="margin-bottom:8px"><label>Nesi olur?</label><select id="kinB" onchange="calcKin()">${opts(b)}</select></div>
+    <div id="kinRes" class="kin-res"></div>
+    <div class="ma"><button class="btn bg" onclick="swapKin()">⇅ Yer değiştir</button><button class="btn bp" onclick="cModal('kinModal')">Kapat</button></div>`;
+  document.getElementById('kinModal').style.display='flex';calcKin();
+}
+function swapKin(){const a=document.getElementById('kinA'),b=document.getElementById('kinB'),t=a.value;a.value=b.value;b.value=t;calcKin();}
+function calcKin(){
+  const A=document.getElementById('kinA').value,B=document.getElementById('kinB').value,el=document.getElementById('kinRes');
+  const r=kinship(A,B);
+  if(!r){el.innerHTML='<div style="color:var(--text3)">Bu iki kişi arasında ağaçta bir bağlantı bulunamadı.</div>';return;}
+  if(r.self){el.innerHTML='<div>Aynı kişiyi seçtiniz 🙂</div>';return;}
+  el.innerHTML=`<div class="kin-big">${esc(kinSentence(A,B))}</div>`+
+    (r.common?`<div class="kin-sub">Ortak ata: ${esc(pname(people[r.common]))}</div>`:'')+
+    (r.chain?`<div class="kin-sub">Kan bağı yok; bağlantı evlilikler üzerinden.</div>`:'');
+}
+
+// ── Mükerrer kişi bulucu ──
+const _fold=s=>(s||'').toLocaleLowerCase('tr-TR').replace(/\s+/g,'');
+function notDupSet(){try{return new Set(JSON.parse(localStorage.getItem(userKey('sa4_notdup'))||'[]'));}catch(e){return new Set();}}
+function findDupes(){
+  const nd=notDupSet(),pl=Object.values(people),groups={};
+  pl.forEach(p=>{const k=_fold(p.firstName)+'|'+p.gender;if(_fold(p.firstName))(groups[k]=groups[k]||[]).push(p);});
+  const out=[];
+  Object.values(groups).forEach(g=>{
+    for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++){
+      const a=g[i],b=g[j],key=[a.id,b.id].sort().join('|');if(nd.has(key))continue;
+      if((a.spouses||[]).some(s=>s.id===b.id)||a.father===b.id||a.mother===b.id||b.father===a.id||b.mother===a.id)continue;
+      const sa=[a.lastName,a.maidenName].map(_fold).filter(Boolean),sb=[b.lastName,b.maidenName].map(_fold).filter(Boolean);
+      if(sa.length&&sb.length&&!sa.some(x=>sb.includes(x)))continue;
+      const ya=yearOf(a.birthDate),yb=yearOf(b.birthDate);
+      if(ya&&yb&&Math.abs(+ya-+yb)>1)continue;
+      // Anne/baba adları biliniyorsa farklı olmamalı
+      const pn=(p,r)=>p[r]&&people[p[r]]?_fold(people[p[r]].firstName):'';
+      if(['father','mother'].some(r=>pn(a,r)&&pn(b,r)&&pn(a,r)!==pn(b,r)))continue;
+      // Anne/baba ayrı kayıtlarsa onların da doğum yılı uyuşmalı (aynı adlı farklı kuşaklar: Mehmet 1874 / Mehmet 1928)
+      if(['father','mother'].some(r=>{const x=people[a[r]],y=people[b[r]];if(!x||!y||x===y)return false;const yx=yearOf(x.birthDate),yy=yearOf(y.birthDate);return !(yx&&yy&&Math.abs(+yx-+yy)<=1);}))continue;
+      // Aynı anne-babanın aynı adlı iki çocuğu (ör. ölen ilk çocuğun adı verilmiş) ancak doğum yılı aynıysa
+      if(a.father&&a.father===b.father&&a.mother===b.mother&&!(ya&&yb&&ya===yb))continue;
+      let score=0;
+      if(ya&&yb)score+=3;if(sa.length&&sb.length)score+=2;
+      if(['father','mother'].some(r=>pn(a,r)&&pn(a,r)===pn(b,r)))score+=2;
+      if(a.birthPlace&&b.birthPlace&&_fold(a.birthPlace)===_fold(b.birthPlace))score+=1;
+      if(score<4)continue;   // yalnızca ad benzerliği yetmez
+      out.push({a,b,key,score});
+    }
+  });
+  return out.sort((x,y)=>y.score-x.score);
+}
+function dupSummary(p){
+  const par=[people[p.father],people[p.mother]].filter(Boolean).map(q=>q.firstName).join(' & ');
+  const bits=[p.birthDate&&'d. '+p.birthDate,p.birthPlace,isDead(p)&&(p.deathDate?'ö. '+p.deathDate:'vefat'),par&&'ebeveyn: '+par,
+    (p.spouses||[]).length&&'eş: '+(p.spouses||[]).map(s=>people[s.id]&&people[s.id].firstName).filter(Boolean).join(', '),
+    (p.children||[]).length&&(p.children||[]).length+' çocuk'].filter(Boolean);
+  return`<div class="dup-p" onclick="openDetail('${p.id}')"><b>${esc(pname(p))}</b>${p.maidenName?' <i>d. '+esc(p.maidenName)+'</i>':''}<div>${esc(bits.join(' · ')||'bilgi yok')}</div></div>`;
+}
+function renderDupes(){
+  const el=document.getElementById('dupList');if(!el)return;
+  const d=findDupes();
+  if(!d.length){el.innerHTML='<div style="text-align:center;padding:14px;color:var(--accent2);font-size:.88rem">✅ Mükerrer görünen kişi yok</div>';return;}
+  el.innerHTML=`<div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">${d.length} olası mükerrer çift</div>`+d.map(x=>`
+    <div class="dup-row">
+      <div class="dup-pair">${dupSummary(x.a)}${dupSummary(x.b)}</div>
+      <div class="dup-act">
+        <button class="btn bp bs" onclick="askMerge('${x.a.id}','${x.b.id}')">⬅ Soldakinde birleştir</button>
+        <button class="btn bg bs" onclick="askMerge('${x.b.id}','${x.a.id}')">Sağdakinde birleştir ➡</button>
+        <button class="btn bg bs" onclick="notDup('${x.key}')">Farklı kişiler</button>
+      </div>
+    </div>`).join('');
+}
+function notDup(key){const s=notDupSet();s.add(key);try{localStorage.setItem(userKey('sa4_notdup'),JSON.stringify([...s]));}catch(e){}renderDupes();}
+async function askMerge(keep,drop){
+  const k=people[keep],d=people[drop];if(!k||!d)return;
+  if(!await askConfirm(`"${pname(d)}" kaydı "${pname(k)}" ile birleştirilecek: boş alanlar doldurulur, eş/çocuk/fotoğraflar birleşir, ikinci kayıt silinir. Devam edilsin mi?`,'Birleştir'))return;
+  mergePeople(keep,drop);
+  save();saveLayout(true);renderAll();buildTree();renderDupes();
+  toast('🔗 Kayıtlar birleştirildi');
+}
+function mergePeople(keep,drop){
+  const k=people[keep],d=people[drop];
+  ['firstName','lastName','maidenName','birthDate','birthPlace','deathDate','deathPlace','occupation','photo'].forEach(f=>{if(!k[f]&&d[f])k[f]=d[f];});
+  if(d.deceased)k.deceased=true;
+  if(d.notes&&d.notes!==k.notes)k.notes=k.notes?k.notes+'\n'+d.notes:d.notes;
+  k.gallery=[...new Set([...(k.gallery||[]),...(d.gallery||[])])];
+  if(!k.father&&d.father)k.father=d.father;
+  if(!k.mother&&d.mother)k.mother=d.mother;
+  (d.spouses||[]).forEach(s=>{if(!(k.spouses||[]).some(x=>x.id===s.id))k.spouses.push({...s});});
+  k.children=[...new Set([...(k.children||[]),...(d.children||[])])];
+  // Diğer herkesin bağlantılarını yeni kayda çevir
+  Object.values(people).forEach(p=>{
+    if(p.id===drop)return;
+    if(p.father===drop)p.father=keep;
+    if(p.mother===drop)p.mother=keep;
+    if(p.spouse===drop)p.spouse=keep;
+    if(p.spouses){p.spouses.forEach(s=>{if(s.id===drop)s.id=keep;});p.spouses=p.spouses.filter((s,i,a)=>a.findIndex(t=>t.id===s.id)===i);}
+    if(p.children)p.children=[...new Set(p.children.map(c=>c===drop?keep:c))];
+  });
+  k.spouses=k.spouses.filter(s=>s.id!==keep);k.children=k.children.filter(c=>c!==keep);
+  if(k.father===keep)k.father=null;if(k.mother===keep)k.mother=null;
+  k.spouse=k.spouses.length?k.spouses[0].id:null;
+  delete people[drop];delete nodeDrag[drop];delete imgCache[drop];
+}
+
+// ── Hatırlatmalar (Liste sekmesinin üstü) ──
+function dateParts(s){const m=String(s||'').trim().match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})$/);return m?{d:+m[1],m:+m[2],y:+m[3]}:null;}
+function upcomingEvents(days){
+  const t=new Date(),t0=new Date(t.getFullYear(),t.getMonth(),t.getDate()),ev=[];
+  const next=(d,m)=>{let x=new Date(t0.getFullYear(),m-1,d);if(x<t0)x=new Date(t0.getFullYear()+1,m-1,d);return x;};
+  Object.values(people).forEach(p=>{
+    const b=dateParts(p.birthDate);
+    if(b&&!isDead(p)){const x=next(b.d,b.m),diff=Math.round((x-t0)/864e5);if(diff<=days)ev.push({id:p.id,diff,kind:'bd',n:x.getFullYear()-b.y,d:b.d,m:b.m});}
+    const dd=dateParts(p.deathDate);
+    // 01/07 nüfus kaydında "yalnızca yılı biliniyor" anlamına gelir — anma günü olarak gösterilmez
+    if(dd&&!(dd.d===1&&dd.m===7)){const x=next(dd.d,dd.m),diff=Math.round((x-t0)/864e5);if(diff<=days)ev.push({id:p.id,diff,kind:'an',n:x.getFullYear()-dd.y,d:dd.d,m:dd.m});}
+  });
+  return ev.sort((a,b)=>a.diff-b.diff);
+}
+function renderReminders(){
+  const el=document.getElementById('remind');if(!el)return;
+  const today=new Date().toISOString().slice(0,10);
+  let hid=null;try{hid=localStorage.getItem('sa4_remhide');}catch(e){}
+  const ev=Object.keys(people).length?upcomingEvents(14):[];
+  if(!ev.length||hid===today){el.innerHTML='';return;}
+  const when=d=>d===0?'Bugün':d===1?'Yarın':d+' gün sonra';
+  el.innerHTML=`<div class="remind"><div class="remind-h"><span>📅 Yaklaşan günler</span><button onclick="hideRem()" title="Bugünlük gizle">×</button></div>`+
+    ev.slice(0,6).map(e=>{const p=people[e.id];const dm=String(e.d).padStart(2,'0')+'/'+String(e.m).padStart(2,'0');
+      return`<div class="remind-i" onclick="openDetail('${e.id}')"><b>${when(e.diff)}</b> · ${dm} · ${e.kind==='bd'?`🎂 ${esc(pname(p))} <span>${e.n} yaşına giriyor</span>`:`🕊️ ${esc(pname(p))} <span>vefatının ${e.n}. yılı</span>`}</div>`;}).join('')+
+    (ev.length>6?`<div class="remind-more">+${ev.length-6} daha (İstatistik sekmesinde)</div>`:'')+'</div>';
+}
+function hideRem(){try{localStorage.setItem('sa4_remhide',new Date().toISOString().slice(0,10));}catch(e){}renderReminders();}
+
+// ── Yazdır ──
+function printTree(){
+  const off=renderTreeCanvas(4000);if(!off){toast('Ağaç boş');return;}
+  let url;try{url=off.toDataURL('image/png');}catch(e){toast('⚠️ Fotoğraflar yüzünden yazdırılamadı');return;}
+  const pa=document.getElementById('printArea');
+  const who=treeMode==='focus'&&people[focusId]?pname(people[focusId])+' — ':'';
+  pa.innerHTML=`<h1>Soy Ağacı</h1><div class="pa-sub">${esc(who)}${new Date().toLocaleDateString('tr-TR')}</div><img src="${url}" alt="">`;
+  const img=pa.querySelector('img');
+  const go=()=>{document.body.classList.add('printing');setTimeout(()=>window.print(),50);};
+  img.complete?go():img.onload=go;
+}
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+
+// ── Doğum yerleri haritası (İstatistik) ──
+let _map=null,_mapLayer=null;
+function loadAsset(tag,attrs){return new Promise((ok,no)=>{const e=document.createElement(tag);Object.assign(e,attrs);e.onload=ok;e.onerror=no;document.head.appendChild(e);});}
+async function showBirthMap(){
+  const box=document.getElementById('bpMap'),info=document.getElementById('bpInfo');
+  box.style.display='block';document.getElementById('bpBtn').style.display='none';
+  if(!window.L){
+    info.textContent='Harita yükleniyor…';
+    try{
+      await loadAsset('link',{rel:'stylesheet',href:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'});
+      await loadAsset('script',{src:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'});
+    }catch(e){info.textContent='⚠️ Harita yüklenemedi (internet bağlantısını kontrol edin)';return;}
+  }
+  if(!_map){
+    _map=L.map(box,{scrollWheelZoom:false}).setView([39,35],5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(_map);
+  }
+  await refreshBirthMap();
+}
+// Yer adları önbellekte yoksa OpenStreetMap'ten (saniyede 1 istek) bulunur; kişi bilgisi gönderilmez
+async function refreshBirthMap(){
+  if(!_map)return;
+  const info=document.getElementById('bpInfo');
+  const by={};Object.values(people).forEach(p=>{const pl=(p.birthPlace||'').trim();if(pl&&_fold(pl)!=='türkiye')(by[pl]=by[pl]||[]).push(p.id);});
+  let cache={};try{cache=JSON.parse(localStorage.getItem('sa4_geo')||'{}');}catch(e){}
+  const todo=Object.keys(by).filter(k=>!(k in cache));
+  for(let i=0;i<todo.length;i++){
+    info.textContent=`Yerler bulunuyor… ${i+1}/${todo.length}`;
+    const q=/türkiye|turkey/i.test(todo[i])?todo[i]:todo[i]+', Türkiye';
+    try{
+      const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=tr&q='+encodeURIComponent(q));
+      const j=await r.json();cache[todo[i]]=j[0]?[+j[0].lat,+j[0].lon]:null;
+    }catch(e){cache[todo[i]]=null;}
+    try{localStorage.setItem('sa4_geo',JSON.stringify(cache));}catch(e){}
+    if(i<todo.length-1)await new Promise(r=>setTimeout(r,1100));
+  }
+  if(_mapLayer)_mapLayer.remove();
+  _mapLayer=L.layerGroup().addTo(_map);
+  const pts=[];let miss=0;
+  Object.entries(by).forEach(([pl,ids])=>{
+    const c=cache[pl];if(!c){miss+=ids.length;return;}pts.push(c);
+    L.circleMarker(c,{radius:Math.min(26,6+ids.length*1.6),color:'#c8855a',weight:2,fillColor:'#c8855a',fillOpacity:.35})
+      .bindPopup(`<b>${esc(pl)}</b> (${ids.length})<br>`+ids.slice(0,30).map(id=>`<a href="#" onclick="openDetail('${id}');return false">${esc(pname(people[id]))}</a>`).join('<br>')+(ids.length>30?'<br>…':''))
+      .addTo(_mapLayer);
+  });
+  if(pts.length)_map.fitBounds(pts,{padding:[30,30],maxZoom:10});
+  info.textContent=`${Object.keys(by).length} farklı doğum yeri`+(miss?` · ${miss} kişinin yeri haritada bulunamadı`:'');
+  setTimeout(()=>_map.invalidateSize(),100);
+}
+
+// ── Ağaç: arama kutusu + odak geçmişi ──
+let _fHist=[],_srIdx=-1;
+function focusBack(){
+  while(_fHist.length){const id=_fHist.pop();if(people[id]){_fBackNav=true;setFocus(id,true);_fBackNav=false;return;}}
+  updateTreeUI();
+}
+function tSearchInput(){
+  const inp=document.getElementById('tSearch'),box=document.getElementById('tSRes');
+  const q=(inp.value||'').trim().toLocaleLowerCase('tr-TR');
+  if(!q){box.style.display='none';return;}
+  const res=Object.values(people).filter(p=>[p.firstName,p.lastName,p.maidenName].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR').includes(q))
+    .sort((a,b)=>pname(a).localeCompare(pname(b),'tr')).slice(0,12);
+  _srIdx=-1;
+  box.innerHTML=res.length?res.map(p=>`<div data-id="${esc(p.id)}" onmousedown="pickSearch('${p.id}')">${esc(pname(p))}${p.maidenName?' <i>d. '+esc(p.maidenName)+'</i>':''} <small>${yearOf(p.birthDate)||''}</small></div>`).join(''):'<div class="none">Sonuç yok</div>';
+  box.style.display='block';
+}
+function tSearchKey(e){
+  const box=document.getElementById('tSRes'),it=[...box.querySelectorAll('div[data-id]')];
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!it.length)return;_srIdx=(_srIdx+(e.key==='ArrowDown'?1:-1)+it.length)%it.length;it.forEach((d,i)=>d.classList.toggle('on',i===_srIdx));}
+  else if(e.key==='Enter'){const d=it[_srIdx>=0?_srIdx:0];if(d)pickSearch(d.dataset.id);}
+  else if(e.key==='Escape'){e.target.blur();}
+}
+function pickSearch(id){
+  const inp=document.getElementById('tSearch');document.getElementById('tSRes').style.display='none';inp.blur();
+  focusPerson(id);
+}
+function tSearchBlur(){setTimeout(()=>{document.getElementById('tSRes').style.display='none';updateTreeUI();},150);}
+
+function renderAll(){renderList();renderReminders();renderMeSel();updateFocSel();if(document.getElementById('statsPanel').classList.contains('active'))renderStats();if(document.getElementById('settingsPanel').classList.contains('active')){renderMissing();renderDupes();}if(_map)refreshBirthMap();}
 
 // ESC ile açık olan modalı kapat
 document.addEventListener('keydown',e=>{
@@ -2568,7 +3003,7 @@ async function signOut(){
   if(supaUser&&_lsGet('sa4_dirty')===supaUser.id&&
      !await askConfirm('Bazı değişiklikler henüz buluta kaydedilemedi. Çıkış yaparsanız bu cihazdaki kaydedilmemiş değişiklikler kaybolacak. Yine de çıkılsın mı?','Çıkış yap'))return;
   await supa.auth.signOut();
-  ['sa4','sa4_ts','sa4nd','sa4_dirty','sa4_base'].forEach(_lsDel);
+  ['sa4','sa4_ts','sa4nd','sa4_dirty','sa4_base',userKey('sa4nd')].forEach(_lsDel);
   people={};nextId=1;nodeDrag={};imgCache={};photoUrls={};_serverTs=0;
   setSync('');
   renderAll();buildTree();

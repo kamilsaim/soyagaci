@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-6.0-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-6.1-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -115,6 +115,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **6.1** | **Akrabalık hesaplayıcı** (amca, dayı, hala, teyze, yeğen, kuzen, yenge, enişte, kayınpeder, görümce, elti, bacanak…) ve "Ben kimim?" · "vefat etti, tarihi bilinmiyor" işareti (e-Devlet'teki tarihsiz ölüm kayıtları artık kaybolmuyor) · mükerrer kişi bulma ve birleştirme · yaklaşan doğum günü ve anma günleri · ağaçta arama, geri butonu ve yazdırma · doğum yerleri haritası |
 | **6.0** | **Yeni ağaç görünümü ve yeni logo.** 🎯 Odak görünümü (kişi ortada, atalar üstte, torunlar altta, animasyonlu geçiş) · Tüm Ağaç yerleşimi baştan yazıldı (çocuklar evliliğe göre gruplu, soy hattı vurgusu) · yatay kartlar, evlilik rozetleri, kuşak etiketleri · PNG olarak indirme · kişi kartında “🌳 Ağaçta” · sayfa boyutu 6,4 MB → 1 MB |
 | **5.2** | **Güvenlik ve senkronizasyon denetimi.** Çakışmada bulut sürümü artık korunuyor · cihaz saati farkı veri silemiyor · bağlantı hatasında eski veri buluta gönderilmiyor · çıkışta kaydedilmemiş değişiklik uyarısı · düzenleme formunda bulut fotoğrafı görünüyor · GED aktarımında kızlık soyadı ve çok satırlı notlar korunuyor · ebeveyn/eş bağlantı düzeltmeleri · JSON yedek dosyası doğrulaması |
 | **5.1** | Fotoğraflar Supabase Storage'a taşındı, yüklemede otomatik küçültme, kullanılmayan fotoğrafların otomatik temizliği; kullanılmayan `fams` alanı kaldırıldı |
