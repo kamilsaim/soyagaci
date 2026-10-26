@@ -66,20 +66,29 @@ Kartlarda fotoğraf, ad–soyad (kızlık soyadıyla), doğum–ölüm yılları
 ### 💑 Zengin aile ilişkileri
 Çoklu eş desteği — her eş için ayrı durum: **evli**, **boşanmış** 💔, **dul** 🕊️, **birlikte** 🤝. Kızlık soyadı, tek ebeveynli çocuklar ve üvey bağlar doğru biçimde saklanır. Kişinin kendi atası olmasını engelleyen döngü koruması vardır.
 
+### 🔗 Akrabalık hesaplayıcı
+İki kişi seçin, aralarındaki akrabalığı Türkçe söylesin: *"Ekrem, Kamil'in dayısı"*, *"Esra, Mustafa'nın gelini"*. Amca, hala, dayı, teyze, yeğen, kuzen (*amcasının oğlu*), yenge, enişte, kayınpeder, kayınvalide, baldız, görümce, elti, bacanak, üvey bağlar ve uzak atalar (*babaannesinin babası*) tanınır. **Ayarlar → Ben Kimim?** ile kendinizi seçerseniz her kişi kartında o kişinin size ne olduğu yazar.
+
 ### 📸 Fotoğraf galerisi
 Kişi başına bir ana fotoğraf ve sınırsız galeri. Sürükle-bırak ile yükleyin, tam ekran lightbox'ta gezin, ok tuşlarıyla ilerleyin.
 
 Fotoğraflar yüklenirken otomatik küçültülür (en uzun kenar 1400 px, JPEG) ve **buluttaki özel deponuza** kaydedilir — ağaç verisinin kendisi küçük ve hızlı kalır. Depo herkese kapalıdır; görüntüleme kısa ömürlü imzalı bağlantılarla yapılır ve yalnızca sizin oturumunuz erişebilir. Bir fotoğraf artık hiçbir kişide kullanılmıyorsa kendiliğinden silinir.
 
 ### 📊 İstatistikler
-Toplam kişi, hayatta olanlar, **kuşak sayısı**, vefat edenlerin ortalama ömrü, yaşayanların ortalama yaşı, yaşam rekorları, en sık isimler, on yıllara göre doğum grafiği, doğum yerleri ve soyadı dağılımı. Ayrıca **30 gün içindeki doğum günleri** 🎂 listelenir.
+Toplam kişi, hayatta olanlar, **kuşak sayısı**, vefat edenlerin ortalama ömrü, yaşayanların ortalama yaşı, yaşam rekorları, en sık isimler, on yıllara göre doğum grafiği, doğum yerleri ve soyadı dağılımı. Ayrıca **30 gün içindeki doğum günleri** 🎂 listelenir ve **📍 doğum yerleri haritası** ailenin hangi şehir ve köylerden geldiğini gösterir (konum bulmak için yalnızca yer adları OpenStreetMap'e gönderilir).
 
-### 🔍 Eksik veri raporu
-Hangi kişide ad, soyad, doğum tarihi, fotoğraf ya da bağlantı eksik — tek listede görün, tıklayıp tamamlayın.
+### 📅 Hatırlatmalar
+Liste ekranının üstünde önümüzdeki 14 gündeki **doğum günleri** 🎂 ve **vefat yıl dönümleri** 🕊️ görünür.
+
+### 🔍 Eksik veri raporu ve mükerrer kişi kontrolü
+Hangi kişide ad, soyad, doğum tarihi, fotoğraf ya da bağlantı eksik — tek listede görün, tıklayıp tamamlayın. **Mükerrer kişi kontrolü** aynı kişinin iki kez girilmiş olabileceği kayıtları bulur (ad, soyad, doğum yılı, anne-baba adları); tek tıkla birleştirince boş alanlar dolar, eşler, çocuklar ve fotoğraflar tek kayıtta toplanır.
+
+Vefat tarihi bilinmeyenler için kişi formunda **"Vefat etti (tarihi bilinmiyor)"** işareti vardır; e-Devlet'ten gelen tarihsiz ölüm kayıtları bu şekilde korunur.
 
 ### 📁 İçe / dışa aktarma
 - **GEDCOM 5.5.1** — MyHeritage, Ancestry ve benzeri programlarla iki yönlü uyum. Dışa aktarımda `FAMC`/`FAMS` işaretçileri, kızlık soyadı ve standart tarih biçimi yazılır.
 - **JSON yedek** — tüm kişileri, bağlantıları ve fotoğraf referanslarını içerir; aynı butonla geri yüklenir. Bulut fotoğraflarının kendisi ayrı depoda durur, yedek dosyasında yalnızca bağlantıları bulunur (yani yedek aynı hesapta geri yüklenmelidir).
+- **e-Devlet Alt-Üst Soy belgesi** — [e-Devlet Soyağacı → GEDCOM](https://kamilsaim.github.io/edevlet-ged/) dönüştürücüsüyle `.ged` dosyasına çevirip **GED Yükle** ile açın.
 - Üzerine yazacak her içe aktarma işlemi önce onay sorar.
 
 ### ☁️ Güvenli senkronizasyon
