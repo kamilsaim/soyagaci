@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-6.2.2-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-6.2.3-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -124,6 +124,7 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **6.2.3** | e-Devlet soyağacı dönüştürücüsünün bağlantısı uygulamaya eklendi (Bilgi → Veri İşlemleri ve boş liste ekranı) |
 | **6.2.2** | Telefonda üst başlığın taşıp sayfayı sola kaydırması düzeltildi (GED yükleme Bilgi sekmesinde) |
 | **6.2.1** | Telefonda ana ekrana eklenerek kullanıldığında üst başlığın saat/çentik bölgesine taşması düzeltildi · aşağı çekince sayfanın esnemesi kapatıldı |
 | **6.2** | **Hatırlatmalar:** açılışta yaklaşan doğum günü ve yıl dönümü uyarısı · ay ay gezilebilen takvim · Ayarlar'da hatırlatma seçimi ve "kaç gün önce" · 01/07 yer tutucu tarihler hatırlatılmaz |

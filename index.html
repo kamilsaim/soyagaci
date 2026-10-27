@@ -96,6 +96,9 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .mon-i.past{opacity:.5}.mon-i.today{background:#fff3e8;font-weight:600}.mon-i.faint{opacity:.65}
 .mon-note{font-size:.7rem;color:var(--text3);margin-top:8px}
 .rs-grid{display:flex;flex-direction:column;gap:8px;font-size:.84rem}.rs-grid label{display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:.84rem;font-weight:600;color:var(--text)}.rs-grid input[type=checkbox]{width:auto;margin:0}.rs-grid select{padding:5px 8px;font-size:.8rem}
+.edv-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface2);text-decoration:none;color:var(--text);margin-bottom:10px;transition:border-color .18s}
+.edv-card:hover{border-color:var(--accent)}.edv-ic{font-size:1.6rem;flex-shrink:0}.edv-card b{display:block;font-size:.88rem}
+.edv-card span{display:block;font-size:.74rem;color:var(--text2);margin-top:2px;line-height:1.45}.edv-go{margin-left:auto;font-weight:700;color:var(--accent);font-size:.8rem;white-space:nowrap;flex-shrink:0}
 .kin-line{font-size:.78rem;color:var(--accent);margin-top:3px;font-weight:600}
 .kin-res{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);padding:12px;min-height:48px}
 .kin-big{font-size:1rem;font-weight:700;color:var(--text)}.kin-sub{font-size:.75rem;color:var(--text3);margin-top:4px}
@@ -424,6 +427,7 @@ textarea{resize:vertical;min-height:65px}
   <div class="info-card">
     <h4>📋 Sürüm Geçmişi</h4>
     <ul>
+      <li><strong>v6.2.3</strong> — 🏛️ e-Devlet soyağacı dönüştürücüsünün bağlantısı Bilgi → Veri İşlemleri'ne ve boş liste ekranına eklendi.</li>
       <li><strong>v6.2.2</strong> — Telefonda üst başlık sığmayıp sayfayı sola kaydırıyordu: "GED Yükle" başlıktan kaldırıldı (Bilgi → Veri İşlemleri'nde), dar ekranda kullanıcı adı gizlendi.</li>
       <li><strong>v6.2.1</strong> — Telefonda ana ekrana eklenerek kullanıldığında üst başlığın saat/çentik bölgesine taşması düzeltildi; aşağı çekince sayfanın esnemesi kapatıldı.</li>
       <li><strong>v6.2</strong> — 🔔 <strong>Hatırlatmalar:</strong> uygulama açılınca yaklaşan doğum günü ve vefat yıl dönümü uyarısı; 🗓️ ay ay gezilebilen takvim (o ay doğanlar ve yıl dönümleri); Ayarlar'da doğum günü / yıl dönümü seçimi ve "kaç gün önce haber verilsin". Nüfus kaydındaki 01/07 yer tutucu tarihler hatırlatılmaz.</li>
@@ -458,6 +462,11 @@ textarea{resize:vertical;min-height:65px}
   </div>
   <div class="info-card">
     <h4>📁 Veri İşlemleri</h4>
+    <a class="edv-card" href="https://kamilsaim.github.io/edevlet-ged/" target="_blank" rel="noopener">
+      <div class="edv-ic">🏛️</div>
+      <div><b>e-Devlet'ten soyağacı aktar</b><span>e-Devlet → <i>Alt-Üst Soy Bilgisi Sorgulama</i> tablosunu dönüştürücüye yapıştırın, oluşan .ged dosyasını aşağıdan yükleyin. Yükleme mevcut ağacın üzerine yazar — ağacınız doluysa önce JSON yedek alın.</span></div>
+      <div class="edv-go">Aç ↗</div>
+    </a>
     <div class="iz" id="impZone" style="padding:20px 14px;margin-bottom:10px">
       <input type="file" id="fi" accept=".ged,.gedcom" onchange="handleGED(this)">
       <div class="izi" style="font-size:2rem;margin-bottom:6px">📂</div>
@@ -664,7 +673,7 @@ let supaUser=null,saveTimer=null;
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
-const APP_VER='6.2.2';
+const APP_VER='6.2.3';
 document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.appver').forEach(e=>{e.textContent='v'+APP_VER;}));
 (function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.replace(location.origin+location.pathname+'?v='+APP_VER+location.hash);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},nextId=1;
@@ -1151,7 +1160,7 @@ function renderList(){
   const el=document.getElementById('pList');
   const list=getFilt();
   if(!Object.keys(people).length){
-    el.innerHTML=`<div class="es"><div class="ei">👨‍👩‍👧‍👦</div><h3>Henüz kimse yok</h3><p>Kişi ekleyin ya da <b>Bilgi</b> sekmesinden GED dosyası yükleyin.</p><button class="btn bp" onclick="openForm()">+ Kişi Ekle</button></div>`;return;
+    el.innerHTML=`<div class="es"><div class="ei">👨‍👩‍👧‍👦</div><h3>Henüz kimse yok</h3><p>Kişi ekleyin ya da <b>Bilgi</b> sekmesinden GED dosyası yükleyin.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn bp" onclick="openForm()">+ Kişi Ekle</button><a class="btn bg" href="https://kamilsaim.github.io/edevlet-ged/" target="_blank" rel="noopener" style="text-decoration:none">🏛️ e-Devlet'ten aktar</a></div></div>`;return;
   }
   if(!list.length){el.innerHTML=`<div class="es"><div class="ei">🔍</div><h3>Sonuç yok</h3></div>`;return;}
   el.innerHTML=list.map(p=>{
