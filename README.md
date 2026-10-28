@@ -10,7 +10,7 @@ _Tarayıcıda çalışan, Türkçe, kurulum gerektirmeyen aile ağacı uygulamas
 
 [![Uygulamayı Aç](https://img.shields.io/badge/▶_Uygulamayı_Aç-c8855a?style=for-the-badge)](https://kamilsaim.github.io/soyagaci/)
 
-![Sürüm](https://img.shields.io/badge/sürüm-6.2.3-8faa8a?style=flat-square)
+![Sürüm](https://img.shields.io/badge/sürüm-6.3.1-8faa8a?style=flat-square)
 ![Tek dosya](https://img.shields.io/badge/tek_dosya-HTML-7ba3b8?style=flat-square)
 ![Bağımlılık](https://img.shields.io/badge/framework-yok-c9a87c?style=flat-square)
 ![Dil](https://img.shields.io/badge/dil-Türkçe-b89ab8?style=flat-square)
@@ -89,6 +89,7 @@ Vefat tarihi bilinmeyenler için kişi formunda **"Vefat etti (tarihi bilinmiyor
 - **GEDCOM 5.5.1** — MyHeritage, Ancestry ve benzeri programlarla iki yönlü uyum. Dışa aktarımda `FAMC`/`FAMS` işaretçileri, kızlık soyadı ve standart tarih biçimi yazılır.
 - **JSON yedek** — tüm kişileri, bağlantıları ve fotoğraf referanslarını içerir; aynı butonla geri yüklenir. Bulut fotoğraflarının kendisi ayrı depoda durur, yedek dosyasında yalnızca bağlantıları bulunur (yani yedek aynı hesapta geri yüklenmelidir).
 - **e-Devlet Alt-Üst Soy belgesi** — [e-Devlet Soyağacı → GEDCOM](https://kamilsaim.github.io/edevlet-ged/) dönüştürücüsüyle `.ged` dosyasına çevirip **Bilgi → Veri İşlemleri**'nden yükleyin.
+- **Mevcut ağaca ekleme** — ağacınız doluyken GED yüklerseniz *➕ Ağaca ekle* ya da *Hepsini değiştir* seçilir. Ekle derseniz zaten ağaçta olan kişiler (ad, cinsiyet, doğum yılı; anne-baba, eş ve çocuklar üzerinden zincirleme) mevcut kayıtla birleştirilir, yalnızca yeni kişiler eklenir — örneğin babanızın e-Devlet soyağacını kendi ağacınıza katabilirsiniz. Birleştirmeden önce **önizleme ekranı** açılır: dosyadaki ve ağaçtaki kişi yan yana gösterilir, yanlış eşleşmenin işaretini kaldırabilirsiniz; onaylamadan hiçbir şey kaydedilmez.
 - Üzerine yazacak her içe aktarma işlemi önce onay sorar.
 
 ### ☁️ Güvenli senkronizasyon
@@ -124,6 +125,8 @@ Değişiklikler önce cihaza, ardından buluta yazılır. Başlıktaki küçük 
 
 | Sürüm | Öne çıkanlar |
 |---|---|
+| **6.3.1** | GED birleştirmeden önce önizleme ekranı: birleştirilecekler (dosyada ↔ ağacınızda) ve yeni eklenecekler; yanlış eşleşme işaretten çıkarılabilir |
+| **6.3** | **GED dosyası mevcut ağaca eklenebiliyor** — aynı kişiler otomatik birleşir, yeni kişiler doğru anne-babaya bağlanır (ör. babanızın e-Devlet soyağacı) · isim farklarına tolerans ("Sail" ~ "Sail Efendi") |
 | **6.2.3** | e-Devlet soyağacı dönüştürücüsünün bağlantısı uygulamaya eklendi (Bilgi → Veri İşlemleri ve boş liste ekranı) |
 | **6.2.2** | Telefonda üst başlığın taşıp sayfayı sola kaydırması düzeltildi (GED yükleme Bilgi sekmesinde) |
 | **6.2.1** | Telefonda ana ekrana eklenerek kullanıldığında üst başlığın saat/çentik bölgesine taşması düzeltildi · aşağı çekince sayfanın esnemesi kapatıldı |
