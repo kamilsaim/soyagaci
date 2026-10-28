@@ -427,6 +427,7 @@ textarea{resize:vertical;min-height:65px}
   <div class="info-card">
     <h4>📋 Sürüm Geçmişi</h4>
     <ul>
+      <li><strong>v6.3.0</strong> — ➕ GED dosyası artık mevcut ağaca eklenebiliyor: aynı kişiler (ad, doğum yılı, anne-baba/eş/çocuk) otomatik birleştirilir, emin olunamayanlar Ayarlar → Mükerrer kişiler'de gösterilir. Örn. babanızın e-Devlet soyağacını kendi ağacınıza katabilirsiniz.</li>
       <li><strong>v6.2.3</strong> — 🏛️ e-Devlet soyağacı dönüştürücüsünün bağlantısı Bilgi → Veri İşlemleri'ne ve boş liste ekranına eklendi.</li>
       <li><strong>v6.2.2</strong> — Telefonda üst başlık sığmayıp sayfayı sola kaydırıyordu: "GED Yükle" başlıktan kaldırıldı (Bilgi → Veri İşlemleri'nde), dar ekranda kullanıcı adı gizlendi.</li>
       <li><strong>v6.2.1</strong> — Telefonda ana ekrana eklenerek kullanıldığında üst başlığın saat/çentik bölgesine taşması düzeltildi; aşağı çekince sayfanın esnemesi kapatıldı.</li>
@@ -464,7 +465,7 @@ textarea{resize:vertical;min-height:65px}
     <h4>📁 Veri İşlemleri</h4>
     <a class="edv-card" href="https://kamilsaim.github.io/edevlet-ged/" target="_blank" rel="noopener">
       <div class="edv-ic">🏛️</div>
-      <div><b>e-Devlet'ten soyağacı aktar</b><span>e-Devlet → <i>Alt-Üst Soy Bilgisi Sorgulama</i> tablosunu dönüştürücüye yapıştırın, oluşan .ged dosyasını aşağıdan yükleyin. Yükleme mevcut ağacın üzerine yazar — ağacınız doluysa önce JSON yedek alın.</span></div>
+      <div><b>e-Devlet'ten soyağacı aktar</b><span>e-Devlet → <i>Alt-Üst Soy Bilgisi Sorgulama</i> tablosunu dönüştürücüye yapıştırın, oluşan .ged dosyasını aşağıdan yükleyin. Ağacınız doluysa yeni kişiler mevcut ağaca eklenir, aynı kişiler birleştirilir (yine de önce JSON yedek almanız iyi olur).</span></div>
       <div class="edv-go">Aç ↗</div>
     </a>
     <div class="iz" id="impZone" style="padding:20px 14px;margin-bottom:10px">
@@ -645,8 +646,9 @@ textarea{resize:vertical;min-height:65px}
   <div class="md" style="width:min(360px,100%);text-align:center;padding:22px 18px" onclick="event.stopPropagation()">
     <div style="font-size:2rem;margin-bottom:6px">⚠️</div>
     <div id="confirmMsg" style="margin-bottom:18px;color:var(--text)"></div>
-    <div style="display:flex;gap:10px;justify-content:center">
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn bg bs" style="flex:1" onclick="_confirmResolve(false)">Vazgeç</button>
+      <button class="btn bg bs" id="confirmAlt" style="flex:1;display:none" onclick="_confirmResolve('alt')"></button>
       <button class="btn bs" id="confirmOk" style="flex:1;background:#c0392b;color:#fff" onclick="_confirmResolve(true)">Sil</button>
     </div>
   </div>
@@ -673,7 +675,7 @@ let supaUser=null,saveTimer=null;
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
-const APP_VER='6.2.3';
+const APP_VER='6.3.0';
 document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.appver').forEach(e=>{e.textContent='v'+APP_VER;}));
 (function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.replace(location.origin+location.pathname+'?v='+APP_VER+location.hash);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},nextId=1;
@@ -1029,7 +1031,7 @@ function splitGedName(v){
   const p=String(v||'').trim().split(/\s+/).filter(Boolean);
   return{fn:p.slice(0,-1).join(' ')||p[0]||'',ln:p.length>1?p[p.length-1]:''};
 }
-function parseGED(txt){
+function parseGED(txt,merge){
   const lines=txt.split(/\r?\n/);
   let cur=null,tag=null,tP={},tF={};
   function g(r){return r.replace(/@/g,'');}
@@ -1069,12 +1071,13 @@ function parseGED(txt){
       if(lv===1&&t==='DIV')cur.div=true;
     }
   }
-  people={};nextId=1;
-  const im={};
+  // merge: yeni kişiler mevcut ağaca çakışmayan kimliklerle eklenir, aynı kişiler mergeImported ile birleştirilir
+  if(!merge){people={};nextId=1;}
+  const im={},add={};
   for(const gid of Object.keys(tP)){const pid=newId();im[gid]=pid;}
   for(const[gid,src]of Object.entries(tP)){
     const pid=im[gid];
-    people[pid]={id:pid,firstName:capStr(src.fn||''),lastName:capStr(src.ln||''),gender:src.gn||'M',
+    add[pid]={id:pid,firstName:capStr(src.fn||''),lastName:capStr(src.ln||''),gender:src.gn||'M',
       birthDate:normDate(src.bd||''),birthPlace:capStr(src.bp||''),deathDate:normDate(src.dd||''),deathPlace:capStr(src.dp||''),deceased:!!src.dead,
       occupation:capStr(src.oc||''),notes:(src.no||'').trim(),maidenName:src.gn==='F'?capStr(src.mn||''):'',maritalStatus:'married',
       photo:null,gallery:[],mother:null,father:null,spouse:null,spouses:[],children:[]};
@@ -1085,26 +1088,92 @@ function parseGED(txt){
     const div=fam.div;
     if(h&&w){
       const ms=div?'divorced':'married';
-      if(people[h]){if(!people[h].spouses.find(s=>s.id===w))people[h].spouses.push({id:w,status:ms});people[h].spouse=w;}
-      if(people[w]){if(!people[w].spouses.find(s=>s.id===h))people[w].spouses.push({id:h,status:ms});people[w].spouse=h;}
+      if(add[h]){if(!add[h].spouses.find(s=>s.id===w))add[h].spouses.push({id:w,status:ms});add[h].spouse=w;}
+      if(add[w]){if(!add[w].spouses.find(s=>s.id===h))add[w].spouses.push({id:h,status:ms});add[w].spouse=h;}
     }
     for(const cid of ch){
-      if(!people[cid])continue;
-      if(h){people[cid].father=h;if(people[h]&&!people[h].children.includes(cid))people[h].children.push(cid);}
-      if(w){people[cid].mother=w;if(people[w]&&!people[w].children.includes(cid))people[w].children.push(cid);}
+      if(!add[cid])continue;
+      if(h){add[cid].father=h;if(add[h]&&!add[h].children.includes(cid))add[h].children.push(cid);}
+      if(w){add[cid].mother=w;if(add[w]&&!add[w].children.includes(cid))add[w].children.push(cid);}
     }
   }
-  Object.values(people).forEach(p=>{p.children=[...new Set(p.children)];});
-  imgCache={};nodeDrag={};
-  save();saveLayout(true);toast(`✅ ${Object.keys(people).length} kişi aktarıldı`);
+  Object.values(add).forEach(p=>{p.children=[...new Set(p.children)];});
+  if(merge){
+    Object.assign(people,add);
+    const n=Object.keys(add).length,m=mergeImported(Object.keys(add));
+    save();saveLayout(true);
+    const dup=findDupes().length;
+    toast(`✅ ${n-m} yeni kişi eklendi, ${m} kişi mevcut kayıtla birleştirildi`+(dup?` · ${dup} olası mükerrer Ayarlar'da`:''));
+  }else{
+    people=add;imgCache={};nodeDrag={};
+    save();saveLayout(true);toast(`✅ ${Object.keys(people).length} kişi aktarıldı`);
+  }
   renderAll();buildTree();
 }
 
-// GED / JSON içe aktarma — mevcut ağacın üzerine yazmadan önce onay ister
+// GED birleştirme: içe aktarılan kişileri (newIds) ağaçta zaten olan aynı kişilerle eşleştirip birleştirir.
+// 1) Kesin eşleşme: ad + cinsiyet + doğum yılı, üstüne aynı tam tarih ya da soyad/ebeveyn adı uyumu; iki yönde de tek aday
+// 2) Yayılma: eşleşen çiftin anne/baba/eş/çocukları ada göre (tek aday ve çelişki yoksa) eşleşir — e-Devlet'in yalnızca adı bilinen ataları böyle bulunur
+// Eşleşen sayısını döner; emin olunamayanlar Ayarlar → Mükerrer'e kalır
+function mergeImported(newIds){
+  const isNew=new Set(newIds),map=new Map(),used=new Set();
+  const olds=Object.values(people).filter(p=>!isNew.has(p.id));
+  const sur=p=>[p.lastName,p.maidenName].map(_fold).filter(Boolean);
+  // Ad uyumu: aynı ya da birinin kelimeleri ötekinin içinde ("Sail" ~ "Sail Efendi", "Nuran" ~ "Naciye Nuran")
+  const words=s=>(s||'').toLocaleLowerCase('tr-TR').split(/\s+/).filter(Boolean);
+  const nameFit=(x,y)=>{const a=words(x),b=words(y);if(!a.length||!b.length)return false;const[s,l]=a.length<=b.length?[a,b]:[b,a];return s.every(w=>l.includes(w));};
+  const pn=(p,r)=>p[r]&&people[p[r]]?people[p[r]].firstName:'';
+  // rel: yakın üzerinden eşleşme — soyad bakılmaz (evlenen kadınların soyadı kayıtlarda farklı olabilir)
+  const fit=(a,b,rel)=>{
+    if(!a||!b||a.gender!==b.gender)return false;
+    if(!nameFit(a.firstName,b.firstName)&&!(rel&&!words(a.firstName).length&&!words(b.firstName).length))return false;   // adsız kayıt yalnızca yakın üzerinden
+    const sa=sur(a),sb=sur(b);if(!rel&&sa.length&&sb.length&&!sa.some(x=>sb.includes(x)))return false;
+    const ya=yearOf(a.birthDate),yb=yearOf(b.birthDate);if(ya&&yb&&Math.abs(+ya-+yb)>1)return false;
+    return !['father','mother'].some(r=>pn(a,r)&&pn(b,r)&&!nameFit(pn(a,r),pn(b,r)));
+  };
+  const strong=(a,b)=>fit(a,b)&&yearOf(a.birthDate)&&yearOf(b.birthDate)&&
+    (normDate(a.birthDate)===normDate(b.birthDate)||(sur(a).length&&sur(b).length)||['father','mother'].some(r=>pn(a,r)&&nameFit(pn(a,r),pn(b,r))));
+  const free=id=>isNew.has(id)&&!map.has(id);
+  for(const id of newIds){
+    const a=people[id],c=olds.filter(b=>!used.has(b.id)&&strong(a,b));
+    if(c.length!==1||newIds.filter(x=>free(x)&&strong(people[x],c[0])).length!==1)continue;
+    map.set(id,c[0].id);used.add(c[0].id);
+  }
+  // Yakınları üzerinden yayıl
+  const tryPair=(nids,oids)=>{
+    let ch=false;
+    nids.filter(free).forEach(n=>{
+      const c=oids.filter(o=>o&&!isNew.has(o)&&!used.has(o)&&fit(people[n],people[o],true));
+      if(c.length!==1||nids.filter(x=>free(x)&&fit(people[x],people[c[0]],true)).length!==1)return;
+      map.set(n,c[0]);used.add(c[0]);ch=true;
+    });
+    return ch;
+  };
+  for(let go=true;go;){
+    go=false;
+    for(const[n,o]of[...map]){
+      const a=people[n],b=people[o];
+      if(tryPair([a.father].filter(Boolean),[b.father]))go=true;
+      if(tryPair([a.mother].filter(Boolean),[b.mother]))go=true;
+      if(tryPair((a.spouses||[]).map(s=>s.id),(b.spouses||[]).map(s=>s.id)))go=true;
+      if(tryPair(a.children||[],b.children||[]))go=true;
+    }
+  }
+  for(const[n,o]of map)if(people[n]&&people[o])mergePeople(o,n);
+  // Eşleşmeyen yeni ebeveyn, ağaçta zaten başka anne/babası olan çocuğu sahiplenmesin (ikinci anne/baba oluşmasın)
+  newIds.forEach(id=>{const p=people[id];if(!p)return;
+    const slot=p.gender==='F'?'mother':'father';
+    p.children=p.children.filter(c=>people[c]&&(!people[c][slot]||people[c][slot]===id));});
+  return map.size;
+}
+
+// GED / JSON içe aktarma — ağaç doluysa GED için "ekle/birleştir" ya da "hepsini değiştir" sorulur
 async function importGEDText(txt){
   const cur=Object.keys(people).length;
-  if(cur&&!await askConfirm('Mevcut '+cur+' kişilik ağacınız silinip GED dosyasındaki veriyle değiştirilecek. Devam edilsin mi?','Değiştir'))return;
-  parseGED(txt);
+  if(!cur){parseGED(txt);return;}
+  const r=await askConfirm('Ağacınızda '+cur+' kişi var. GED dosyasındaki kişiler ağacınıza eklensin mi? Ağaçta zaten olan kişiler (ad, doğum yılı ve yakınlarına göre) tek kayıtta birleştirilir, mevcut bilgileriniz silinmez.','➕ Ağaca ekle','Hepsini değiştir');
+  if(r===true){parseGED(txt,true);return;}
+  if(r==='alt'&&await askConfirm('Mevcut '+cur+' kişilik ağacınız silinip GED dosyasındaki veriyle değiştirilecek. Emin misiniz?','Değiştir'))parseGED(txt);
 }
 async function importJSONText(txt){
   let o;
@@ -2604,11 +2673,13 @@ async function loadDemo(){
 function cModal(id){const el=document.getElementById(id);if(el)el.style.display='none';}
 
 let _confirmResolveFn=null;
-// askConfirm(mesaj, onayButonuMetni) -> Promise<boolean>
-function askConfirm(msg,okLabel){
+// askConfirm(mesaj, onayButonuMetni, ikinciSecenek?) -> Promise<boolean|'alt'>
+function askConfirm(msg,okLabel,altLabel){
   if(_confirmResolveFn){_confirmResolveFn(false);_confirmResolveFn=null;}
   document.getElementById('confirmMsg').textContent=msg;
   document.getElementById('confirmOk').textContent=okLabel||'Sil';
+  const alt=document.getElementById('confirmAlt');alt.textContent=altLabel||'';alt.style.display=altLabel?'':'none';
+  document.getElementById('confirmOk').style.background=altLabel?'var(--accent)':'#c0392b';   // üç seçenekte onay güvenli olandır
   document.getElementById('confirmModal').style.display='flex';
   setTimeout(()=>{const b=document.getElementById('confirmOk');if(b)b.focus();},60);
   return new Promise(res=>{_confirmResolveFn=res;});
