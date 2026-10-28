@@ -105,6 +105,11 @@ header{background:var(--surface);border-bottom:1.5px solid var(--border);padding
 .dup-row{border:1.5px solid var(--border);border-radius:var(--rs);padding:8px;margin-bottom:8px;background:var(--surface2)}
 .dup-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dup-p{font-size:.76rem;color:var(--text2);cursor:pointer;min-width:0}.dup-p b{color:var(--text)}
 .dup-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ged-sum{font-size:.82rem;color:var(--text2);margin-bottom:10px;line-height:1.5}.ged-list{max-height:60vh;overflow-y:auto;margin-bottom:6px}
+.ged-h{font-weight:700;font-size:.85rem;margin:8px 0 6px}.ged-h span{display:block;font-weight:400;font-size:.72rem;color:var(--text3)}
+.ged-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 8px 4px 34px;font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.ged-row{display:flex;gap:8px;align-items:flex-start;cursor:pointer;text-transform:none;letter-spacing:normal;font-weight:400;font-size:inherit;color:inherit;margin-bottom:8px}.ged-row input{margin-top:3px;flex-shrink:0;width:18px;height:18px}.ged-row .dup-pair{flex:1;min-width:0}.ged-row .dup-p{cursor:pointer}
+.ged-row:has(input:not(:checked)){opacity:.5}.ged-new{padding:6px 8px;border-bottom:1px solid var(--border)}
 #bpMap{display:none;height:380px;border-radius:var(--r);border:1.5px solid var(--border);margin-top:8px;z-index:0}
 #printArea{display:none}
 @media print{body.printing>*:not(#printArea){display:none!important}body.printing #printArea{display:block!important}#printArea h1{font-family:'Playfair Display',serif;font-size:20pt;color:#c8855a;margin:0}#printArea .pa-sub{font-size:10pt;color:#7a6457;margin-bottom:6mm}#printArea img{width:100%;height:auto}@page{size:landscape;margin:10mm}}
@@ -427,6 +432,7 @@ textarea{resize:vertical;min-height:65px}
   <div class="info-card">
     <h4>📋 Sürüm Geçmişi</h4>
     <ul>
+      <li><strong>v6.3.1</strong> — 📥 GED ağaca eklenmeden önce önizleme ekranı: birleştirilecek kişiler (dosyada ↔ ağacınızda) ve yeni eklenecekler listelenir, yanlış eşleşmenin işareti kaldırılabilir; onaylamadan hiçbir şey kaydedilmez.</li>
       <li><strong>v6.3.0</strong> — ➕ GED dosyası artık mevcut ağaca eklenebiliyor: aynı kişiler (ad, doğum yılı, anne-baba/eş/çocuk) otomatik birleştirilir, emin olunamayanlar Ayarlar → Mükerrer kişiler'de gösterilir. Örn. babanızın e-Devlet soyağacını kendi ağacınıza katabilirsiniz.</li>
       <li><strong>v6.2.3</strong> — 🏛️ e-Devlet soyağacı dönüştürücüsünün bağlantısı Bilgi → Veri İşlemleri'ne ve boş liste ekranına eklendi.</li>
       <li><strong>v6.2.2</strong> — Telefonda üst başlık sığmayıp sayfayı sola kaydırıyordu: "GED Yükle" başlıktan kaldırıldı (Bilgi → Veri İşlemleri'nde), dar ekranda kullanıcı adı gizlendi.</li>
@@ -639,6 +645,10 @@ textarea{resize:vertical;min-height:65px}
 <div class="mo" id="kinModal" style="display:none;z-index:250" onclick="cModal('kinModal')">
   <div class="md" onclick="event.stopPropagation()" id="kinCont" style="width:min(440px,100%)"></div>
 </div>
+<!-- MODAL: GED birleştirme önizlemesi (dışına tıklayınca kapanmaz — yanlışlıkla iptal olmasın) -->
+<div class="mo" id="gedModal" style="display:none;z-index:250">
+  <div class="md" id="gedCont" style="width:min(620px,100%)" onclick="event.stopPropagation()"></div>
+</div>
 <div id="printArea"></div>
 
 <!-- MODAL: CONFIRM -->
@@ -675,7 +685,7 @@ let supaUser=null,saveTimer=null;
 // ══════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════
-const APP_VER='6.3.0';
+const APP_VER='6.3.1';
 document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.appver').forEach(e=>{e.textContent='v'+APP_VER;}));
 (function(){const k='sa4_appver';const sv=localStorage.getItem(k);if(sv&&sv!==APP_VER){localStorage.setItem(k,APP_VER);location.replace(location.origin+location.pathname+'?v='+APP_VER+location.hash);}else{localStorage.setItem(k,APP_VER);}})();
 let people={},nextId=1;
@@ -1073,7 +1083,7 @@ function parseGED(txt,merge){
   }
   // merge: yeni kişiler mevcut ağaca çakışmayan kimliklerle eklenir, aynı kişiler mergeImported ile birleştirilir
   if(!merge){people={};nextId=1;}
-  const im={},add={};
+  const im={},add={},nid0=nextId;
   for(const gid of Object.keys(tP)){const pid=newId();im[gid]=pid;}
   for(const[gid,src]of Object.entries(tP)){
     const pid=im[gid];
@@ -1099,11 +1109,11 @@ function parseGED(txt,merge){
   }
   Object.values(add).forEach(p=>{p.children=[...new Set(p.children)];});
   if(merge){
+    // Önce önizleme: kullanıcı onaylayana kadar hiçbir şey kaydedilmez (Vazgeç → eklenenler geri alınır)
     Object.assign(people,add);
-    const n=Object.keys(add).length,m=mergeImported(Object.keys(add));
-    save();saveLayout(true);
-    const dup=findDupes().length;
-    toast(`✅ ${n-m} yeni kişi eklendi, ${m} kişi mevcut kayıtla birleştirildi`+(dup?` · ${dup} olası mükerrer Ayarlar'da`:''));
+    const ids=Object.keys(add);
+    showGedPreview(ids,matchImported(ids),nid0);
+    return;
   }else{
     people=add;imgCache={};nodeDrag={};
     save();saveLayout(true);toast(`✅ ${Object.keys(people).length} kişi aktarıldı`);
@@ -1114,8 +1124,8 @@ function parseGED(txt,merge){
 // GED birleştirme: içe aktarılan kişileri (newIds) ağaçta zaten olan aynı kişilerle eşleştirip birleştirir.
 // 1) Kesin eşleşme: ad + cinsiyet + doğum yılı, üstüne aynı tam tarih ya da soyad/ebeveyn adı uyumu; iki yönde de tek aday
 // 2) Yayılma: eşleşen çiftin anne/baba/eş/çocukları ada göre (tek aday ve çelişki yoksa) eşleşir — e-Devlet'in yalnızca adı bilinen ataları böyle bulunur
-// Eşleşen sayısını döner; emin olunamayanlar Ayarlar → Mükerrer'e kalır
-function mergeImported(newIds){
+// matchImported eşleşmeleri (yeni → eski) bulur, applyImported birleştirir; emin olunamayanlar Ayarlar → Mükerrer'e kalır
+function matchImported(newIds){
   const isNew=new Set(newIds),map=new Map(),used=new Set();
   const olds=Object.values(people).filter(p=>!isNew.has(p.id));
   const sur=p=>[p.lastName,p.maidenName].map(_fold).filter(Boolean);
@@ -1159,12 +1169,53 @@ function mergeImported(newIds){
       if(tryPair(a.children||[],b.children||[]))go=true;
     }
   }
+  return map;
+}
+function applyImported(newIds,map){
   for(const[n,o]of map)if(people[n]&&people[o])mergePeople(o,n);
   // Eşleşmeyen yeni ebeveyn, ağaçta zaten başka anne/babası olan çocuğu sahiplenmesin (ikinci anne/baba oluşmasın)
   newIds.forEach(id=>{const p=people[id];if(!p)return;
     const slot=p.gender==='F'?'mother':'father';
     p.children=p.children.filter(c=>people[c]&&(!people[c][slot]||people[c][slot]===id));});
   return map.size;
+}
+
+// GED birleştirme önizlemesi: dosyadaki ↔ ağaçtaki eşleşmeler (işareti kaldırılan ayrı kişi olarak eklenir) + yeni kişiler
+let _gedPend=null;
+function gedSum(p){
+  const nm=q=>q?q.firstName||'İsimsiz':'';
+  const par=[nm(people[p.father]),nm(people[p.mother])].filter(Boolean).join(' & ');
+  const sp=(p.spouses||[]).map(s=>nm(people[s.id])).filter(Boolean).join(', ');
+  const bits=[p.birthDate&&'d. '+p.birthDate,p.birthPlace,par&&'ebeveyn: '+par,sp&&'eş: '+sp].filter(Boolean);
+  return`<b>${esc(pname(p))}</b>${p.maidenName?' <i>d. '+esc(p.maidenName)+'</i>':''}<div>${esc(bits.join(' · ')||'bilgi yok')}</div>`;
+}
+function showGedPreview(ids,map,nid0){
+  _gedPend={ids,map,nid0};
+  const fresh=ids.filter(id=>!map.has(id));
+  document.getElementById('gedCont').innerHTML=`
+    <h3 style="font-family:'Playfair Display',serif;color:var(--accent);margin-bottom:6px">📥 GED önizleme</h3>
+    <div class="ged-sum">Dosyada ${ids.length} kişi var: <b>${map.size}</b> kişi ağacınızda zaten var ve birleştirilecek, <b>${fresh.length}</b> yeni kişi eklenecek. Onaylayana kadar hiçbir şey kaydedilmez.</div>
+    <div class="ged-list">
+      ${map.size?`<div class="ged-h">🔗 Birleştirilecekler <span>yanlış eşleşmenin işaretini kaldırın, o kişi ayrı eklenir</span></div>
+      <div class="ged-cols"><span>Dosyada</span><span>Ağacınızda</span></div>`+
+      [...map].map(([n,o])=>`<label class="dup-row ged-row"><input type="checkbox" checked data-n="${n}"><div class="dup-pair"><div class="dup-p">${gedSum(people[n])}</div><div class="dup-p">${gedSum(people[o])}</div></div></label>`).join(''):''}
+      ${fresh.length?`<div class="ged-h">➕ Yeni eklenecekler</div>`+fresh.map(id=>`<div class="dup-p ged-new">${gedSum(people[id])}</div>`).join(''):''}
+    </div>
+    <div class="ma"><button class="btn bg" onclick="cancelGedMerge()">Vazgeç</button><button class="btn bp" onclick="applyGedMerge()">✅ Onayla ve ekle</button></div>`;
+  document.getElementById('gedModal').style.display='flex';
+}
+function cancelGedMerge(){
+  if(_gedPend){_gedPend.ids.forEach(id=>{delete people[id];});nextId=_gedPend.nid0;_gedPend=null;}
+  cModal('gedModal');toast('İçe aktarma iptal edildi');
+}
+function applyGedMerge(){
+  if(!_gedPend)return;
+  const{ids,map}=_gedPend;_gedPend=null;
+  document.querySelectorAll('#gedCont input[data-n]').forEach(c=>{if(!c.checked)map.delete(c.dataset.n);});
+  const m=applyImported(ids,map);
+  cModal('gedModal');save();saveLayout(true);renderAll();buildTree();
+  const dup=findDupes().length;
+  toast(`✅ ${ids.length-m} yeni kişi eklendi, ${m} kişi mevcut kayıtla birleştirildi`+(dup?` · ${dup} olası mükerrer Ayarlar'da`:''));
 }
 
 // GED / JSON içe aktarma — ağaç doluysa GED için "ekle/birleştir" ya da "hepsini değiştir" sorulur
@@ -3145,6 +3196,7 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
   if(document.getElementById('lbox').style.display==='flex')return; // lightbox kendi işler
   if(document.getElementById('confirmModal').style.display==='flex'){_confirmResolve(false);return;}
+  if(document.getElementById('gedModal').style.display==='flex'){cancelGedMerge();return;}
   if(document.getElementById('detModal').style.display==='flex'){cModal('detModal');return;}
   if(document.getElementById('formModal').style.display==='flex'){cancelForm();return;}
 });
